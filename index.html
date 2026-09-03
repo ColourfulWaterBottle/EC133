@@ -592,24 +592,26 @@ function wQuadRotate() {
   const slider = el('input', { type: 'range', min: 0, max: 45, value: 0, step: 1, oninput: (e) => draw(+e.target.value) });
   host.append(svg, el('div', { class: 'controls-row' }, el('label', {}, 'rotate frame towards principal axes (0\u00b0 \u2192 45\u00b0)', slider)), readout);
 
+  // Q = x^2 + xy + y^2, A = [[1,1/2],[1/2,1]].
+  // X-axis = eigenvector (1,1), lambda_X = 3/2  ->  short semi-axis 1/sqrt(3/2)
+  // Y-axis = eigenvector (1,-1), lambda_Y = 1/2 ->  long  semi-axis 1/sqrt(1/2)
+  const aX = 1 / Math.sqrt(1.5), aY = 1 / Math.sqrt(0.5);
   function draw(deg) {
-    const phi = deg * Math.PI / 180;
-    // ellipse semi-axes from eigenvalues: lambda X^2 = 1  -> semi-axis 1/sqrt(lambda)
-    const rx = 1 / Math.sqrt(0.5), ry = 1 / Math.sqrt(1.5); // along principal axes
+    const ang = 45 - deg; // group angle: 45 deg (tilted) down to 0 (aligned)
     let g = `<g class="viz-grid">`;
     for (let k = -2; k <= 2; k++) g += `<line x1="${O + k * U}" y1="0" x2="${O + k * U}" y2="${S}"/><line x1="0" y1="${O + k * U}" x2="${S}" y2="${O + k * U}"/>`;
     g += `</g><line class="viz-axis" x1="0" y1="${O}" x2="${S}" y2="${O}"/><line class="viz-axis" x1="${O}" y1="0" x2="${O}" y2="${S}"/>`;
-    // the ellipse is fixed in space, drawn at 45deg; as slider->45 we rotate the whole g so it aligns to axes
-    const rot = -deg; // rotate scene so principal axis meets x-axis
-    g += `<g transform="rotate(${rot} ${O} ${O})">`;
-    g += `<ellipse cx="${O}" cy="${O}" rx="${rx * U}" ry="${ry * U}" transform="rotate(45 ${O} ${O})" fill="var(--accent)" fill-opacity="0.16" stroke="var(--accent)" stroke-width="2"/>`;
-    // principal axes
-    g += `<line x1="${O - rx * U}" y1="${O}" x2="${O + rx * U}" y2="${O}" transform="rotate(45 ${O} ${O})" stroke="var(--teal)" stroke-width="2"/>`;
-    g += `<line x1="${O}" y1="${O - ry * U}" x2="${O}" y2="${O + ry * U}" transform="rotate(45 ${O} ${O})" stroke="var(--teal)" stroke-width="2" stroke-dasharray="4 3"/>`;
+    g += `<text class="viz-label" x="${S - 12}" y="${O - 6}">x</text><text class="viz-label" x="${O + 6}" y="14">y</text>`;
+    g += `<g transform="rotate(${ang} ${O} ${O})">`;
+    g += `<ellipse cx="${O}" cy="${O}" rx="${aX * U}" ry="${aY * U}" fill="var(--accent)" fill-opacity="0.16" stroke="var(--accent)" stroke-width="2"/>`;
+    g += `<line x1="${O - aX * U}" y1="${O}" x2="${O + aX * U}" y2="${O}" stroke="var(--teal)" stroke-width="2"/>`;
+    g += `<line x1="${O}" y1="${O - aY * U}" x2="${O}" y2="${O + aY * U}" stroke="var(--teal)" stroke-width="2" stroke-dasharray="4 3"/>`;
+    g += `<text class="viz-label" x="${O + aX * U + 4}" y="${O + 4}" fill="var(--teal)">X</text>`;
+    g += `<text class="viz-label" x="${O + 4}" y="${O - aY * U - 4}" fill="var(--teal)">Y</text>`;
     g += `</g>`;
     svg.innerHTML = g;
-    if (deg >= 45) readout.innerHTML = `Aligned. In the new variables \\(X=\\tfrac{x+y}{\\sqrt2},\\; Y=\\tfrac{x-y}{\\sqrt2}\\): &nbsp; <b>Q = \\(\\tfrac32 X^2 + \\tfrac12 Y^2\\)</b> &mdash; no cross term, both coefficients &gt; 0, so Q is positive definite (an ellipse).`;
-    else readout.innerHTML = `Q(x,y) = x\u00b2 + xy + y\u00b2. The <b>xy</b> cross-term tilts the ellipse 45\u00b0 off the axes. Rotating to the eigenvectors of A = [1 &frac12; &frac12 1] removes it.`;
+    if (deg >= 45) readout.innerHTML = `Aligned. \\(X = \\tfrac{x+y}{\\sqrt2}\\) along eigenvector \\((1,1)\\) with \\(\\lambda = \\tfrac32\\); \\(Y = \\tfrac{x-y}{\\sqrt2}\\) along \\((1,-1)\\) with \\(\\lambda = \\tfrac12\\). So <b>\\(Q = \\tfrac32 X^2 + \\tfrac12 Y^2\\)</b> \u2014 no cross term, both coefficients \\(> 0\\), positive definite. The short axis is \\(X\\) (larger \\(\\lambda\\)).`;
+    else readout.innerHTML = `\\(Q(x,y) = x^2 + xy + y^2\\). The <b>\\(xy\\)</b> term tilts the level curve \\(45^\\circ\\) off the \\(x,y\\) axes. Rotating the frame onto the eigenvectors of \\(A = \\begin{bmatrix}1 & \\tfrac12\\\\ \\tfrac12 & 1\\end{bmatrix}\\) removes it.`;
     typeset();
   }
   draw(0);
@@ -846,7 +848,7 @@ const LESSONS = [
       ]),
       block('Worked example — straight from the 2024 paper', [
         stepper([
-          { op: 'read off A', text: '\\(p(x,y,z) = (x-y,\\ 2x+z,\\ 3y-2z)\\). Each output row gives a row of \\(A\\): coefficients of \\(x,y,z\\). \\(A = \\begin{bmatrix}1&-1&0\\\\2&0&1\\\\0&3&-2\\end{bmatrix}\\).' },
+          { op: 'read off A', text: '\\(p(x,y,z) = (x-y,\\ 2x+z,\\ 3y-2z)\\). Each output component gives a <b>row</b> of \\(A\\) — its coefficients of \\(x,y,z\\). \\(A = \\begin{bmatrix}1&-1&0\\\\2&0&1\\\\0&3&-2\\end{bmatrix}\\). (Equivalently: column \\(j\\) is \\(p(\\mathbf e_j)\\) — the same matrix, read the other way.)' },
           { op: 'read off B', text: '\\(q(x,y,z) = (4x-2y+z,\\ x+7y+z)\\Rightarrow B = \\begin{bmatrix}4&-2&1\\\\1&7&1\\end{bmatrix}\\) (a \\(2\\times3\\) matrix: \\(\\mathbb R^3\\to\\mathbb R^2\\)).' },
           { op: 'C = BA', text: 'Composite \\(q\\circ p\\): multiply \\(B\\,(2\\times3)\\) by \\(A\\,(3\\times3)\\). Row 1: \\((4,-2,1)\\cdot\\text{cols of }A = (0,-1,-4)\\). Row 2: \\((1,7,1)\\cdot\\text{cols} = (15,2,5)\\). So \\(C = \\begin{bmatrix}0&-1&-4\\\\15&2&5\\end{bmatrix}\\).' },
           { op: 'det A \u2192 geometry', text: '\\(\\det A = 1(0\\cdot-2 - 1\\cdot3) - (-1)(2\\cdot-2 - 1\\cdot0) + 0 = -3 - 4 = -7\\). So \\(p\\) scales volume by \\(|{-7}| = 7\\) and, since \\(\\det A < 0\\), <b>reverses orientation</b>.' },
@@ -893,6 +895,17 @@ const LESSONS = [
       block('See it: A = QDQᵀ is “rotate → stretch → rotate back”', [
         p('Diagonalising is a change of viewpoint. Rotate so the eigenvectors are the axes (\\(Q^{T}\\)), stretch along those axes by the eigenvalues (\\(D\\)), rotate back (\\(Q\\)). Do all three and you have done exactly what \\(A\\) does — which is why \\(A^n = QD^nQ^{-1}\\) makes powers trivial.'),
         wDiagonalise()
+      ]),
+      block('Animated worked example — expanding det(A − kI) for a 3×3', [
+        p('The one bit of real algebra in Q3 / Q5: getting the characteristic polynomial. Here is the companion matrix of \\(x_{n+1} = 6x_n - 11x_{n-1} + 6x_{n-2}\\) (the 2024 paper), where you are asked to verify the eigenvalues are \\(1, 2, 3\\).'),
+        stepper([
+          { op: 'form A − kI', text: '\\(A = \\begin{bmatrix}6&-11&6\\\\1&0&0\\\\0&1&0\\end{bmatrix}\\Rightarrow A - kI = \\begin{bmatrix}6-k&-11&6\\\\1&-k&0\\\\0&1&-k\\end{bmatrix}\\).' },
+          { op: 'expand along row 3', text: 'Row 3 is \\((0,\\ 1,\\ -k)\\) — one zero, so expand there. \\(\\det = 0 \\cdot C_{31} + 1 \\cdot C_{32} + (-k)\\cdot C_{33}\\).' },
+          { op: 'the two cofactors', text: '\\(C_{32} = (-1)^{3+2}\\begin{vmatrix}6-k&6\\\\1&0\\end{vmatrix} = -\\,(0 - 6) = 6\\). \\(\\;C_{33} = (-1)^{3+3}\\begin{vmatrix}6-k&-11\\\\1&-k\\end{vmatrix} = (6-k)(-k) + 11 = k^2 - 6k + 11\\).' },
+          { op: 'assemble', text: '\\(\\det(A - kI) = 1(6) + (-k)(k^2 - 6k + 11) = -k^3 + 6k^2 - 11k + 6\\). Set \\(= 0\\): \\(\\;k^3 - 6k^2 + 11k - 6 = 0\\).' },
+          { op: 'verify the roots', text: 'Substitute: \\(k=1:\\ 1 - 6 + 11 - 6 = 0\\). \\(k=2:\\ 8 - 24 + 22 - 6 = 0\\). \\(k=3:\\ 27 - 54 + 33 - 6 = 0\\). So \\(\\chi_A(k) = (k-1)(k-2)(k-3)\\) and the eigenvalues are \\(1, 2, 3\\). ✓' },
+          { op: 'shortcut check', text: 'Sanity: sum of eigenvalues \\(1+2+3 = 6 = \\operatorname{tr} A\\); product \\(1\\cdot2\\cdot3 = 6 = \\det A\\). Both agree.' }
+        ], { render: () => el('div') })
       ]),
       block('Animated worked example — a second-order recurrence', [
         p('\\(x_n = 3x_{n-1} - 2x_{n-2}\\), \\(x_0 = 2,\\ x_1 = 3\\). Step through the whole method the exam wants.'),
@@ -1013,6 +1026,11 @@ const LESSONS = [
           <p style="margin:0 0 6px"><b>If the columns are dependent</b>, one column is a combination of the others. A type-3 column operation (subtract that combination) makes a column all zeros without changing the determinant. A matrix with a zero column has \\(\\det = 0\\). So dependent columns \\(\\Rightarrow \\det A = 0\\).</p>
           <p style="margin:0 0 6px"><b>Conversely, if \\(\\det A = 0\\)</b>, \\(A\\) is not invertible, so \\(A\\mathbf x = \\mathbf 0\\) has a non-trivial solution \\(\\mathbf x\\). That solution is a non-zero set of coefficients making the columns sum to \\(\\mathbf 0\\) — i.e. the columns are dependent.</p>
           <p style="margin:0">Chain to quote: \\(\\det A = 0 \\iff A\\) singular \\(\\iff\\) columns (and rows) linearly dependent \\(\\iff\\) \\(0\\) is an eigenvalue \\(\\iff\\) \\(\\ker A \\ne \\{\\mathbf 0\\}\\).</p>` })
+      ]),
+      block('"Show det is not linear, but trace is" (2019 / 2020)', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px"><b>\\(\\det\\) is not linear.</b> One counterexample is enough: with \\(A = \\begin{bmatrix}1&0\\\\0&0\\end{bmatrix}\\), \\(B = \\begin{bmatrix}0&0\\\\0&1\\end{bmatrix}\\), \\(\\det A + \\det B = 0 + 0 = 0\\) but \\(\\det(A + B) = \\det I = 1\\). (Or: \\(\\det(2I_2) = 4 \\ne 2\\det I_2\\).)</p>
+          <p style="margin:0"><b>\\(\\operatorname{tr}\\) is linear.</b> Straight from the definition \\(\\operatorname{tr}(A) = \\sum_i a_{ii}\\): \\(\\operatorname{tr}(A + B) = \\sum_i (a_{ii} + b_{ii}) = \\operatorname{tr}(A) + \\operatorname{tr}(B)\\), and \\(\\operatorname{tr}(kA) = \\sum_i k a_{ii} = k\\operatorname{tr}(A)\\). Both conditions hold. ■</p>` })
       ]),
       block('Trace — a quick sanity check on eigenvalues', [
         el('div', { class: 'stage', html: `
@@ -1135,6 +1153,20 @@ const LESSONS = [
           <li>\\(P_2(\\mathbb Z)\\) (integer coefficients): <b>not</b> — not closed under scalar multiplication by \\(\\tfrac12\\).</li></ul>
           <p style="margin:0">Inside \\(M_n(\\mathbb R)\\): symmetric matrices and skew-symmetric matrices are subspaces; <b>singular</b> matrices are not (sum of two singular matrices can be invertible), and <b>invertible</b> matrices are not (no zero matrix).</p>` })
       ]),
+      block('A map on the matrix space M₂(ℝ) (2017 paper)', [
+        p('Same recipe as functions: pick a basis, apply the map to each basis element, read the results off in that basis as columns.'),
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px">Basis of \\(M_2(\\mathbb R)\\): \\(E_{11},E_{12},E_{21},E_{22}\\) (a 1 in one slot, 0 elsewhere), so \\(\\dim M_2(\\mathbb R) = 4\\).</p>
+          <p style="margin:0 0 6px">Transpose map \\(t(A) = A^{T}\\): \\(t(E_{11}) = E_{11}\\), \\(t(E_{12}) = E_{21}\\), \\(t(E_{21}) = E_{12}\\), \\(t(E_{22}) = E_{22}\\). Matrix \\(T = \\begin{bmatrix}1&0&0&0\\\\0&0&1&0\\\\0&1&0&0\\\\0&0&0&1\\end{bmatrix}\\), and \\(T^2 = I\\).</p>
+          <p style="margin:0">Eigenvalues \\(\\pm 1\\): the \\(+1\\)-eigenspace is the <b>symmetric</b> matrices (\\(\\dim 3\\)); the \\(-1\\)-eigenspace is the <b>skew-symmetric</b> matrices (\\(\\dim 1\\)). Both are subspaces of \\(M_2(\\mathbb R)\\).</p>` })
+      ]),
+      block('A vector space with unusual operations + an isomorphism (2020 / 2024)', [
+        p('Q4 sometimes defines a set with strange "\\(+\\)" and "\\(\\times\\)". You verify the axioms, then find an invertible linear map to a familiar \\(\\mathbb R^n\\).'),
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px">\\(\\mathbb R_{+}\\) (positive reals) with \\(x \\boxplus y = xy\\) and \\(k \\boxdot x = x^{k}\\).</p>
+          <p style="margin:0 0 6px"><b>Zero vector:</b> need \\(x \\boxplus \\mathbf 0 = x\\), i.e. \\(x \\cdot \\mathbf 0 = x\\), so \\(\\mathbf 0 = 1\\). <b>Negative of \\(x\\):</b> \\(x \\boxplus (\\boxminus x) = 1\\) gives \\(\\boxminus x = 1/x\\). The distributive / associative axioms follow from the laws of indices.</p>
+          <p style="margin:0"><b>Isomorphism</b> \\(f : \\mathbb R_{+} \\to \\mathbb R\\), \\(f(x) = \\ln x\\): \\(f(x \\boxplus y) = \\ln(xy) = \\ln x + \\ln y = f(x) + f(y)\\), and \\(f(k \\boxdot x) = \\ln(x^{k}) = k \\ln x = k\\,f(x)\\). It is a bijection (inverse \\(e^{t}\\)), so the two spaces are isomorphic and \\(\\dim \\mathbb R_{+} = 1\\).</p>` })
+      ]),
       block('Your turn', [
         practice({
           q: 'Is \\(\\{(1,2),\\,(2,4)\\}\\) a basis for \\(\\mathbb R^2\\)? Type yes or no, and give \\(\\det[\\,\\mathbf v_1\\ \\mathbf v_2\\,]\\).',
@@ -1176,6 +1208,22 @@ const LESSONS = [
           <p style="margin:0 0 6px">Entry \\((i,j)\\) of \\(M^{T}M\\) is (column \\(i\\) of \\(M\\)) \\(\\cdot\\) (column \\(j\\) of \\(M\\)).</p>
           <p style="margin:0 0 6px">Columns are unit length \u2192 diagonal entries \\(= 1\\). Columns are mutually orthogonal \u2192 off-diagonal entries \\(= 0\\).</p>
           <p style="margin:0">So \\(M^{T}M = I\\); \\(M\\) is orthogonal. \u25a0</p>` })
+      ]),
+      block('Proof \u2014 an orthogonal set of non-zero vectors is linearly independent', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px">Let \\(\\{\\mathbf v_1, \\dots, \\mathbf v_m\\}\\) be non-zero with \\(\\mathbf v_i \\cdot \\mathbf v_j = 0\\) for \\(i \\ne j\\). Suppose \\(a_1\\mathbf v_1 + \\cdots + a_m\\mathbf v_m = \\mathbf 0\\).</p>
+          <p style="margin:0 0 6px">Dot both sides with \\(\\mathbf v_i\\): every cross term \\(a_j(\\mathbf v_i \\cdot \\mathbf v_j)\\) with \\(j \\ne i\\) is \\(0\\), leaving \\(a_i(\\mathbf v_i \\cdot \\mathbf v_i) = 0\\).</p>
+          <p style="margin:0">\\(\\mathbf v_i \\ne \\mathbf 0 \\Rightarrow \\mathbf v_i \\cdot \\mathbf v_i > 0 \\Rightarrow a_i = 0\\). True for every \\(i\\), so the only combination giving \\(\\mathbf 0\\) is the trivial one \u2014 linearly independent. \u25a0</p>` })
+      ]),
+      block('Gram\u2013Schmidt \u2014 building an orthonormal basis (2021 paper)', [
+        p('When vectors are independent but not orthogonal (e.g. a repeated eigenvalue), subtract off the parts that overlap what you already have.'),
+        stepper([
+          { op: 'the vectors', text: 'Start from \\(\\mathbf u_1 = (1,1,0)\\), \\(\\mathbf u_2 = (1,0,1)\\), \\(\\mathbf u_3 = (0,1,1)\\).' },
+          { op: 'w\u2081', text: 'Keep the first: \\(\\mathbf w_1 = \\mathbf u_1 = (1,1,0)\\).' },
+          { op: 'w\u2082', text: '\\(\\mathbf w_2 = \\mathbf u_2 - \\dfrac{\\mathbf u_2 \\cdot \\mathbf w_1}{\\mathbf w_1 \\cdot \\mathbf w_1}\\mathbf w_1 = (1,0,1) - \\tfrac{1}{2}(1,1,0) = (\\tfrac12, -\\tfrac12, 1)\\). Check \\(\\mathbf w_2 \\cdot \\mathbf w_1 = 0\\). \u2713' },
+          { op: 'w\u2083', text: '\\(\\mathbf w_3 = \\mathbf u_3 - \\tfrac{1}{2}\\mathbf w_1 - \\dfrac{1/2}{3/2}\\mathbf w_2 = (0,1,1) - (\\tfrac12,\\tfrac12,0) - \\tfrac13(\\tfrac12,-\\tfrac12,1) = (-\\tfrac23, \\tfrac23, \\tfrac23)\\). Check \\(\\mathbf w_3 \\cdot \\mathbf w_1 = \\mathbf w_3 \\cdot \\mathbf w_2 = 0\\). \u2713' },
+          { op: 'normalise', text: 'Divide each by its length: \\(\\hat{\\mathbf w}_1 = \\tfrac{1}{\\sqrt2}(1,1,0)\\), \\(\\hat{\\mathbf w}_2 = \\tfrac{1}{\\sqrt6}(1,-1,2)\\), \\(\\hat{\\mathbf w}_3 = \\tfrac{1}{\\sqrt3}(-1,1,1)\\) \u2014 an orthonormal basis, i.e. the columns of an orthogonal matrix.' }
+        ], { render: () => el('div') })
       ]),
       block('Your turn', [
         practice({
@@ -1358,16 +1406,20 @@ function renderCheat() {
         <li>Subspace test: (i) contains \\(\\mathbf 0\\); (ii) closed under \\(+\\); (iii) closed under scalar \\(\\times\\). One fails ⇒ not a subspace (e.g. \\(\\{(r,r^2,1)\\}\\): no \\(\\mathbf 0\\), not closed).</li>
         <li>\\(\\ker f\\), \\(\\operatorname{im} f\\) are always subspaces (memorised proof — Lesson 6).</li>
         <li>Dimension of a solution space = number of free constants; basis = the functions they multiply.</li>
-        <li>Matrix of a map on a function/polynomial space: apply the map to each basis element, write the result in that basis (columns).</li>
+        <li>Matrix of a map on a function / polynomial / matrix space: apply the map to each basis element, write each result in that basis as a column.</li>
         <li>\\(h\\) injective ⇔ \\(\\ker h=\\{\\mathbf 0\\}\\).</li>
+        <li>Weird operations (e.g. \\(\\mathbb R_+\\), \\(x\\boxplus y = xy\\)): the zero vector is whatever leaves \\(x\\) unchanged; find an isomorphism to \\(\\mathbb R^n\\) (here \\(\\ln\\)).</li>
       </ol>`],
-    ['Q5 · Quadratic forms', `
+    ['Q5 · Quadratic forms & orthogonality', `
       <ol>
         <li>\\(A\\) symmetric: diagonal = square coefficients; off-diagonal = <b>half</b> each cross coefficient.</li>
         <li>\\(\\chi_A\\) → eigenvalues → eigenvectors (auto-orthogonal for distinct \\(\\lambda\\), since \\(A=A^T\\)).</li>
         <li>Normalise eigenvectors → columns of \\(\\hat P\\); \\(A=\\hat P D\\hat P^{T}\\), \\(\\hat P^{T}=\\hat P^{-1}\\).</li>
         <li>New variables \\(\\mathbf V=\\hat P^{T}\\mathbf v\\); diagonal form \\(Q=\\lambda_1X^2+\\lambda_2Y^2+\\cdots\\).</li>
         <li>Definiteness — <b>eigenvalue test:</b> all \\(+\\) pos. def.; all \\(-\\) neg. def.; mixed indefinite; some \\(0\\) semidefinite. <b>Sylvester:</b> \\(D_1,\\dots,D_n>0\\) pos. def.; signs \\(-,+,-,\\dots\\) neg. def.</li>
+        <li>Orthogonal set of non-zero vectors ⇒ independent (dot the combination with each \\(\\mathbf v_i\\)).</li>
+        <li>Gram–Schmidt: \\(\\mathbf w_k = \\mathbf u_k - \\sum_{j<k}\\dfrac{\\mathbf u_k\\cdot\\mathbf w_j}{\\mathbf w_j\\cdot\\mathbf w_j}\\mathbf w_j\\), then normalise.</li>
+        <li>\\(\\det\\) is <b>not</b> linear (\\(\\det(A{+}B)\\neq\\det A+\\det B\\)); \\(\\operatorname{tr}\\) <b>is</b> linear.</li>
       </ol>`],
     ['Formula-sheet essentials', `
       <ul>
