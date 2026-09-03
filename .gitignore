@@ -1,0 +1,6 @@
+# Warwick exam PDFs — source material, not for publication
+*.pdf
+# earlier build
+ec133-crammer.html
+.check.js
+node_modules/

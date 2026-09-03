@@ -1,0 +1,1536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>EC133 Exam Crammer</title>
+<meta name="description" content="Interactive, animated last-night revision for the Warwick EC133 Linear Algebra exam, built around the recurring past-paper questions." />
+<meta name="theme-color" content="#14171b" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#f4f1e7" media="(prefers-color-scheme: light)" />
+<meta name="color-scheme" content="light dark" />
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+    svg: { fontCache: 'global' },
+    startup: { typeset: false }
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js" id="MathJax-script" async></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+
+<style>
+  html { color-scheme: light dark; }
+  img { max-width: 100%; height: auto; }
+  [hidden] { display: none !important; }
+  /* ---------- palette: "worked exam notebook" — slate ink + warm chalk-amber ---------- */
+  :root {
+    --ground: #f4f1e7;
+    --panel: #fffdf6;
+    --panel-2: #efeadb;
+    --ink: #262320;
+    --ink-soft: #55503f;
+    --ink-mute: #857f6c;
+    --rule: #d9d2bf;
+    --accent: #b3762a;
+    --accent-soft: #e8d3ac;
+    --teal: #2f7d6b;
+    --teal-soft: #cfe6df;
+    --flip: #b5462f;
+    --flip-soft: #eccdc3;
+    --shadow: 0 1px 2px rgba(40,35,25,.06), 0 8px 24px rgba(40,35,25,.06);
+    --maxw: 720px;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --ground: #15171b;
+      --panel: #1c1f25;
+      --panel-2: #23272f;
+      --ink: #e9e4d6;
+      --ink-soft: #b7b1a0;
+      --ink-mute: #8b8574;
+      --rule: #333842;
+      --accent: #e0a44e;
+      --accent-soft: #4a3a22;
+      --teal: #6ec2ab;
+      --teal-soft: #24382f;
+      --flip: #e08163;
+      --flip-soft: #3d2820;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.28);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #15171b;
+    --panel: #1c1f25;
+    --panel-2: #23272f;
+    --ink: #e9e4d6;
+    --ink-soft: #b7b1a0;
+    --ink-mute: #8b8574;
+    --rule: #333842;
+    --accent: #e0a44e;
+    --accent-soft: #4a3a22;
+    --teal: #6ec2ab;
+    --teal-soft: #24382f;
+    --flip: #e08163;
+    --flip-soft: #3d2820;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.28);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  }
+
+  h1, h2, h3, h4 { font-family: "Spectral", Georgia, serif; font-weight: 600; line-height: 1.25; text-wrap: balance; margin: 0; }
+  a { color: var(--accent); }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace; font-size: .72rem; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--ink-mute);
+  }
+
+  /* ---------- shell ---------- */
+  .layout { display: grid; grid-template-columns: 264px minmax(0, 1fr); gap: 0; min-height: 100vh; }
+  .rail {
+    border-right: 1px solid var(--rule); background: var(--panel);
+    padding: 22px 18px 40px; position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+  }
+  .rail-brand { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; cursor: pointer; }
+  .rail-brand h1 { font-size: 1.15rem; letter-spacing: .01em; }
+  .rail-brand span { font-size: .72rem; }
+  .rail-sub { color: var(--ink-mute); font-size: .8rem; margin: 0 0 20px; }
+  .rail-progress { height: 5px; background: var(--panel-2); border-radius: 999px; overflow: hidden; margin-bottom: 4px; }
+  .rail-progress i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .5s ease; }
+  .rail-progress-label { font-size: .72rem; color: var(--ink-mute); margin-bottom: 18px; }
+
+  nav.lessons { display: flex; flex-direction: column; gap: 2px; }
+  nav.lessons button {
+    text-align: left; background: none; border: 0; color: var(--ink-soft); cursor: pointer;
+    font: inherit; font-size: .88rem; padding: 8px 10px; border-radius: 7px; display: flex; gap: 9px; align-items: baseline;
+    width: 100%; line-height: 1.35;
+  }
+  nav.lessons button:hover { background: var(--panel-2); color: var(--ink); }
+  nav.lessons button.active { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  nav.lessons button .n { font-family: "IBM Plex Mono", monospace; font-size: .74rem; color: var(--ink-mute); min-width: 15px; }
+  nav.lessons button.active .n { color: var(--accent); }
+  nav.lessons button .tick { margin-left: auto; color: var(--teal); font-size: .8rem; opacity: 0; }
+  nav.lessons button.done .tick { opacity: 1; }
+  .rail hr { border: 0; border-top: 1px solid var(--rule); margin: 16px 0; }
+  .rail .theme-btn {
+    font: inherit; font-size: .78rem; background: var(--panel-2); border: 1px solid var(--rule); color: var(--ink-soft);
+    border-radius: 7px; padding: 6px 10px; cursor: pointer; width: 100%;
+  }
+
+  main { padding: 46px clamp(20px, 6vw, 80px) 120px; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; }
+  .wrap.wide { max-width: 940px; }
+
+  /* ---------- home ---------- */
+  .hero { margin-bottom: 40px; }
+  .hero .eyebrow { display: block; margin-bottom: 14px; }
+  .hero h2 { font-size: clamp(1.9rem, 4.6vw, 2.9rem); letter-spacing: -.01em; margin-bottom: 14px; }
+  .hero p { color: var(--ink-soft); max-width: 60ch; margin: 0 0 8px; }
+  .hero .stamp {
+    display: inline-block; margin-top: 18px; border: 1.5px solid var(--flip); color: var(--flip);
+    font-family: "IBM Plex Mono", monospace; font-size: .74rem; letter-spacing: .12em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 5px; transform: rotate(-1.5deg);
+  }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 18px 18px 16px;
+    cursor: pointer; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; min-height: 172px;
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .card .card-top { display: flex; align-items: center; justify-content: space-between; }
+  .card .idx { font-family: "IBM Plex Mono", monospace; font-size: .8rem; color: var(--accent); }
+  .card .qtag {
+    font-family: "IBM Plex Mono", monospace; font-size: .68rem; letter-spacing: .06em; color: var(--ink-mute);
+    border: 1px solid var(--rule); border-radius: 5px; padding: 2px 6px;
+  }
+  .card h3 { font-size: 1.12rem; }
+  .card p { margin: 0; font-size: .85rem; color: var(--ink-mute); line-height: 1.45; }
+  .card .card-foot { margin-top: auto; font-size: .74rem; font-family: "IBM Plex Mono", monospace; color: var(--teal); opacity: 0; }
+  .card.done .card-foot { opacity: 1; }
+  .card.mock { border-style: dashed; background: var(--panel-2); }
+
+  /* ---------- lesson body ---------- */
+  .lesson-head { margin-bottom: 8px; }
+  .lesson-head .eyebrow { display: block; margin-bottom: 10px; }
+  .lesson-head h2 { font-size: clamp(1.7rem, 4vw, 2.35rem); letter-spacing: -.01em; }
+  .lesson-nav { display: flex; justify-content: space-between; gap: 12px; margin: 60px 0 0; }
+  .lesson-nav button {
+    font: inherit; font-size: .84rem; background: var(--panel); border: 1px solid var(--rule); color: var(--ink-soft);
+    border-radius: 8px; padding: 10px 16px; cursor: pointer; box-shadow: var(--shadow);
+  }
+  .lesson-nav button:hover { border-color: var(--accent); color: var(--ink); }
+  .lesson-nav button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  :root[data-theme="dark"] .lesson-nav button.primary,
+  :root:not([data-theme="light"]) .lesson-nav button.primary { color: #1a1206; }
+
+  section.block { margin-top: 34px; }
+  section.block > h3 {
+    font-size: .82rem; font-family: "IBM Plex Mono", monospace; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+  }
+  section.block > h3::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+  .prose p { margin: 0 0 14px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose ul { margin: 0 0 14px; padding-left: 20px; }
+  .prose li { margin-bottom: 6px; }
+  .prose strong { color: var(--ink); }
+
+  .callout {
+    border: 1px solid var(--rule); border-left: 3px solid var(--accent); background: var(--panel);
+    border-radius: 0 10px 10px 0; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .callout.tech { border-left-color: var(--teal); }
+  .callout.tech h4 { color: var(--teal); }
+  .callout h4 { font-size: .95rem; margin-bottom: 8px; }
+  .callout ul { margin: 0; padding-left: 18px; }
+  .callout li { margin-bottom: 5px; font-size: .92rem; color: var(--ink-soft); }
+  .callout li b { color: var(--ink); }
+
+  /* ---------- stepper widget ---------- */
+  .stage {
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; box-shadow: var(--shadow);
+    padding: 20px; margin: 6px 0;
+  }
+  .stage-scroll { overflow-x: auto; }
+  .step-controls { display: flex; align-items: center; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .step-controls button {
+    font: inherit; font-size: .82rem; background: var(--panel-2); border: 1px solid var(--rule); color: var(--ink);
+    border-radius: 7px; padding: 7px 13px; cursor: pointer;
+  }
+  .step-controls button:hover:not(:disabled) { border-color: var(--accent); }
+  .step-controls button:disabled { opacity: .4; cursor: not-allowed; }
+  .step-controls .spacer { flex: 1; }
+  .step-dots { display: flex; gap: 5px; }
+  .step-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--rule); }
+  .step-dots i.on { background: var(--accent); }
+  .step-caption { margin-top: 14px; min-height: 2.4em; font-size: .95rem; color: var(--ink-soft); }
+  .step-op {
+    display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: .82rem; background: var(--accent-soft);
+    color: var(--ink); padding: 3px 9px; border-radius: 6px; margin-bottom: 8px;
+  }
+
+  /* ---------- matrix table ---------- */
+  table.mtx { border-collapse: collapse; font-family: "IBM Plex Mono", monospace; margin: 0 auto; }
+  table.mtx td {
+    padding: 7px 12px; text-align: right; font-size: 1rem; font-variant-numeric: tabular-nums;
+    transition: background .35s ease, color .35s ease; min-width: 30px;
+  }
+  table.mtx.aug td.bar { border-left: 2px solid var(--ink-mute); }
+  table.mtx tr td:first-child { border-left: 2px solid var(--ink); }
+  table.mtx tr td:last-child { border-right: 2px solid var(--ink); }
+  table.mtx tr:first-child td { border-top: 2px solid var(--ink); }
+  table.mtx tr:last-child td { border-bottom: 2px solid var(--ink); }
+  table.mtx td.hot { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  table.mtx td.pivot { background: var(--teal-soft); color: var(--teal); }
+
+  .vecpill {
+    display: inline-flex; gap: 8px; align-items: center; font-family: "IBM Plex Mono", monospace; font-size: .86rem;
+    background: var(--panel-2); border: 1px solid var(--rule); border-radius: 7px; padding: 5px 10px; margin: 3px 4px 3px 0;
+  }
+
+  /* ---------- svg canvas ---------- */
+  .viz { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; }
+  .viz svg { display: block; width: 100%; height: auto; }
+  .viz-grid line { stroke: var(--rule); stroke-width: 1; }
+  .viz-axis { stroke: var(--ink-mute); stroke-width: 1.5; }
+  .viz-label { fill: var(--ink-mute); font-family: "IBM Plex Mono", monospace; font-size: 11px; }
+  .controls-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+  .controls-row label { font-size: .8rem; color: var(--ink-soft); display: flex; flex-direction: column; gap: 4px; }
+  .controls-row input[type="number"] {
+    width: 62px; font: inherit; font-family: "IBM Plex Mono", monospace; padding: 5px 7px; border-radius: 6px;
+    border: 1px solid var(--rule); background: var(--panel-2); color: var(--ink);
+  }
+  .controls-row input[type="range"] { accent-color: var(--accent); }
+  .readout {
+    font-family: "IBM Plex Mono", monospace; font-size: .86rem; margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+    background: var(--panel-2); border: 1px solid var(--rule); color: var(--ink-soft);
+  }
+  .readout b { color: var(--ink); }
+  .readout .pos { color: var(--teal); }
+  .readout .neg { color: var(--flip); }
+
+  /* ---------- practice ---------- */
+  .practice { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; box-shadow: var(--shadow); padding: 20px; }
+  .practice .q { font-size: .96rem; margin-bottom: 14px; }
+  .practice .fields { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .practice .fields label { font-size: .78rem; color: var(--ink-mute); display: flex; flex-direction: column; gap: 4px; font-family: "IBM Plex Mono", monospace; }
+  .practice .fields input {
+    width: 84px; font: inherit; font-family: "IBM Plex Mono", monospace; padding: 7px 9px; border-radius: 7px;
+    border: 1px solid var(--rule); background: var(--panel-2); color: var(--ink);
+  }
+  .practice .fields input.ok { border-color: var(--teal); background: var(--teal-soft); }
+  .practice .fields input.bad { border-color: var(--flip); background: var(--flip-soft); }
+  .practice button.check {
+    font: inherit; font-size: .84rem; font-weight: 600; background: var(--accent); color: #fff; border: 0;
+    border-radius: 7px; padding: 9px 16px; cursor: pointer;
+  }
+  :root[data-theme="dark"] .practice button.check,
+  :root:not([data-theme="light"]) .practice button.check { color: #1a1206; }
+  .practice .verdict { margin-top: 14px; font-size: .9rem; }
+  .practice .verdict.win { color: var(--teal); }
+  .practice .verdict.lose { color: var(--flip); }
+  .practice .reveal {
+    margin-top: 14px; border-top: 1px dashed var(--rule); padding-top: 14px; font-size: .9rem; color: var(--ink-soft);
+    display: none;
+  }
+  .practice .reveal.show { display: block; }
+  .practice .reveal ol { margin: 8px 0 0; padding-left: 20px; }
+  .practice .reveal li { margin-bottom: 6px; }
+
+  /* ---------- mock exam ---------- */
+  .timer-bar {
+    position: sticky; top: 0; z-index: 5; background: var(--panel); border: 1px solid var(--rule); border-radius: 10px;
+    box-shadow: var(--shadow); padding: 12px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 24px;
+  }
+  .timer-bar .clock { font-family: "IBM Plex Mono", monospace; font-size: 1.5rem; font-weight: 500; letter-spacing: .02em; }
+  .timer-bar .clock.low { color: var(--flip); }
+  .timer-bar button {
+    font: inherit; font-size: .8rem; background: var(--panel-2); border: 1px solid var(--rule); color: var(--ink);
+    border-radius: 7px; padding: 7px 12px; cursor: pointer;
+  }
+  .timer-bar button.go { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  :root[data-theme="dark"] .timer-bar button.go,
+  :root:not([data-theme="light"]) .timer-bar button.go { color: #1a1206; }
+  .exam-q { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; box-shadow: var(--shadow); padding: 22px; margin-bottom: 18px; }
+  .exam-q h3 { font-size: 1.05rem; margin-bottom: 4px; }
+  .exam-q .src { font-family: "IBM Plex Mono", monospace; font-size: .72rem; color: var(--ink-mute); margin-bottom: 12px; }
+  .exam-q .parts { font-size: .93rem; }
+  .exam-q .parts p { margin: 0 0 8px; }
+  .exam-q .marks { color: var(--accent); font-family: "IBM Plex Mono", monospace; font-size: .8rem; }
+  .exam-q .sol { margin-top: 14px; border-top: 1px dashed var(--rule); padding-top: 14px; display: none; font-size: .9rem; color: var(--ink-soft); }
+  .exam-q .sol.show { display: block; }
+  .exam-q .sol h4 { color: var(--teal); font-size: .84rem; font-family: "IBM Plex Mono", monospace; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+  .exam-q .sol ol { padding-left: 20px; margin: 0; }
+  .exam-q .sol li { margin-bottom: 7px; }
+  .exam-q .toggle-sol {
+    margin-top: 14px; font: inherit; font-size: .82rem; background: var(--panel-2); border: 1px solid var(--rule);
+    color: var(--ink); border-radius: 7px; padding: 8px 14px; cursor: pointer;
+  }
+
+  .cheat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .cheat-card { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; box-shadow: var(--shadow); padding: 18px; }
+  .cheat-card h3 { font-size: 1rem; color: var(--accent); margin-bottom: 10px; }
+  .cheat-body { font-size: .86rem; color: var(--ink-soft); }
+  .cheat-body ol, .cheat-body ul { margin: 0; padding-left: 18px; }
+  .cheat-body li { margin-bottom: 7px; line-height: 1.5; }
+  .cheat-body b { color: var(--ink); }
+
+  .mjx-container { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+
+  .rail-toggle {
+    display: none; position: fixed; top: 12px; left: 12px; z-index: 20;
+    font: inherit; font-size: .82rem; font-weight: 600; background: var(--panel); color: var(--ink);
+    border: 1px solid var(--rule); border-radius: 8px; padding: 8px 13px; cursor: pointer; box-shadow: var(--shadow);
+  }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    .rail-toggle { display: block; }
+    .rail {
+      position: fixed; inset: 0 auto 0 0; z-index: 15; width: min(82vw, 320px); height: 100vh;
+      transform: translateX(-102%); transition: transform .25s ease; box-shadow: var(--shadow);
+    }
+    .rail.open { transform: none; }
+    .rail-scrim {
+      position: fixed; inset: 0; z-index: 14; background: rgba(0,0,0,.4); border: 0;
+    }
+    main { padding: 62px 18px 90px; }
+    .wrap.wide, .wrap { max-width: 100%; }
+    main table.mtx td { padding: 6px 8px; font-size: .92rem; }
+  }
+</style>
+</head>
+<body>
+
+<button class="rail-toggle" id="railToggle" aria-label="Open lesson menu">&#9776; Lessons</button>
+<div class="layout">
+  <aside class="rail" id="rail">
+    <div class="rail-brand" onclick="go('home')">
+      <h1>EC133 Crammer</h1><span class="mono">v2</span>
+    </div>
+    <p class="rail-sub">Linear Algebra &middot; Warwick &middot; built from the 2016&ndash;2024 papers</p>
+    <div class="rail-progress"><i id="railFill"></i></div>
+    <p class="rail-progress-label" id="railPct">0 of 9 done</p>
+    <nav class="lessons" id="railNav"></nav>
+    <hr />
+    <button class="theme-btn" id="themeBtn">Toggle light / dark</button>
+    <hr />
+    <p class="rail-progress-label">Progress is saved on this device only. Unofficial student revision aid &mdash; not affiliated with the University of Warwick.</p>
+  </aside>
+
+  <main>
+    <div id="view"></div>
+  </main>
+</div>
+
+<script>
+/* =====================================================================
+   EC133 Crammer — content + interactive widgets
+   Every worked number below is checked against the model solutions in
+   the 2019 / 2022 / 2024 papers.
+   ===================================================================== */
+
+const store = {
+  get done() { try { return JSON.parse(localStorage.getItem('ec133done') || '[]'); } catch { return []; } },
+  mark(id) { const d = new Set(this.done); d.add(id); localStorage.setItem('ec133done', JSON.stringify([...d])); },
+  clear() { localStorage.removeItem('ec133done'); }
+};
+
+/* ---------- helpers ---------- */
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') n.className = v;
+    else if (k === 'html') n.innerHTML = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v);
+  }
+  for (const kid of kids) if (kid != null) n.append(kid.nodeType ? kid : document.createTextNode(kid));
+  return n;
+};
+const typeset = () => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(); };
+
+/* matrix -> HTML table with optional highlighted rows + augmented bar */
+function matrixTable(rows, { hotRows = [], augCol = null, pivots = [] } = {}) {
+  const t = el('table', { class: 'mtx' + (augCol != null ? ' aug' : '') });
+  rows.forEach((r, i) => {
+    const tr = el('tr');
+    r.forEach((val, j) => {
+      const td = el('td', {}, fmt(val));
+      if (hotRows.includes(i)) td.classList.add('hot');
+      if (augCol != null && j === augCol) td.classList.add('bar');
+      if (pivots.some(p => p[0] === i && p[1] === j)) td.classList.add('pivot');
+      tr.append(td);
+    });
+    t.append(tr);
+  });
+  return el('div', { class: 'stage-scroll' }, t);
+}
+function fmt(v) {
+  if (typeof v === 'string') return v;
+  if (Number.isInteger(v)) return String(v);
+  // render simple fractions
+  const denom = [2, 3, 4, 5, 6, 13];
+  for (const d of denom) { if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return `${Math.round(v * d)}/${d}`; }
+  return v.toFixed(2);
+}
+
+/* ---------- generic step-through stage ---------- */
+function stepper(steps, { render }) {
+  let i = 0;
+  const host = el('div', { class: 'stage' });
+  const body = el('div');
+  const caption = el('div', { class: 'step-caption' });
+  const dots = el('div', { class: 'step-dots' }, ...steps.map(() => el('i')));
+  const prev = el('button', {}, '\u2039 Prev');
+  const next = el('button', {}, 'Next step \u203a');
+  const replay = el('button', {}, '\u21ba Replay');
+
+  function paint() {
+    body.replaceChildren(render(steps[i], i));
+    caption.replaceChildren();
+    if (steps[i].op) caption.append(el('div', { class: 'step-op' }, steps[i].op));
+    caption.append(el('div', { html: steps[i].text || '' }));
+    dots.querySelectorAll('i').forEach((d, k) => d.classList.toggle('on', k <= i));
+    prev.disabled = i === 0;
+    next.disabled = i === steps.length - 1;
+    typeset();
+  }
+  prev.onclick = () => { if (i > 0) { i--; paint(); } };
+  next.onclick = () => { if (i < steps.length - 1) { i++; paint(); } };
+  replay.onclick = () => { i = 0; paint(); };
+
+  host.append(body, caption,
+    el('div', { class: 'step-controls' }, prev, next, el('span', { class: 'spacer' }), dots, replay));
+  paint();
+  return host;
+}
+
+/* ============================ WIDGETS ============================ */
+
+/* 1. Row-reduction animator */
+function wRowReduce(system) {
+  return stepper(system.steps, {
+    render: (s) => matrixTable(s.m, { hotRows: s.hot || [], augCol: system.augCol })
+  });
+}
+
+/* 2. Determinant / unit-square transform */
+function wDetTransform(init) {
+  const host = el('div', { class: 'viz' });
+  const S = 220, O = S / 2, U = 46; // px per unit
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${S} ${S}`);
+  host.append(svg);
+
+  const state = { a: init.a, b: init.b, c: init.c, d: init.d, t: 1 };
+  const readout = el('div', { class: 'readout' });
+  const mk = (n, v, label) => el('label', {}, label,
+    el('input', { type: 'number', step: '1', value: v, oninput: (e) => { state[n] = parseFloat(e.target.value) || 0; draw(); } }));
+  const controls = el('div', { class: 'controls-row' },
+    mk('a', state.a, 'a'), mk('b', state.b, 'b'), mk('c', state.c, 'c'), mk('d', state.d, 'd'),
+    el('button', { class: 'check', onclick: animate }, 'Transform \u25b6'));
+
+  function pt(x, y) { return [O + x * U, O - y * U]; }
+  function draw() {
+    const { a, b, c, d, t } = state;
+    // interpolate identity -> M
+    const A = 1 + (a - 1) * t, B = b * t, C = c * t, D = 1 + (d - 1) * t;
+    const corners = [[0, 0], [1, 0], [1, 1], [0, 1]].map(([x, y]) => pt(A * x + B * y, C * x + D * y));
+    const det = a * d - b * c;
+    let g = `<g class="viz-grid">`;
+    for (let k = -2; k <= 2; k++) { g += `<line x1="${O + k * U}" y1="0" x2="${O + k * U}" y2="${S}"/><line x1="0" y1="${O + k * U}" x2="${S}" y2="${O + k * U}"/>`; }
+    g += `</g><line class="viz-axis" x1="0" y1="${O}" x2="${S}" y2="${O}"/><line class="viz-axis" x1="${O}" y1="0" x2="${O}" y2="${S}"/>`;
+    const fill = det >= 0 ? 'var(--teal)' : 'var(--flip)';
+    g += `<polygon points="${corners.map(p => p.join(',')).join(' ')}" fill="${fill}" fill-opacity="0.22" stroke="${fill}" stroke-width="2"/>`;
+    // image of e1 (a,c) and e2 (b,d)
+    const e1 = pt((1 + (a - 1) * t), (c * t)), e2 = pt((b * t), (1 + (d - 1) * t));
+    g += `<line x1="${O}" y1="${O}" x2="${e1[0]}" y2="${e1[1]}" stroke="var(--accent)" stroke-width="2.5"/>`;
+    g += `<line x1="${O}" y1="${O}" x2="${e2[0]}" y2="${e2[1]}" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="4 3"/>`;
+    svg.innerHTML = g;
+    const sign = det > 0 ? '<span class="pos">preserved</span>' : det < 0 ? '<span class="neg">reversed</span>' : 'collapsed';
+    readout.innerHTML =
+      `M = [<b>${state.a} ${state.b}</b> ; <b>${state.c} ${state.d}</b>] &nbsp; ` +
+      `det M = (${state.a})(${state.d}) &minus; (${state.b})(${state.c}) = <b>${det}</b><br>` +
+      `unit square (area 1) &rarr; parallelogram of area <b>|det M| = ${Math.abs(det)}</b> &nbsp;·&nbsp; orientation ${sign}`;
+  }
+  function animate() {
+    state.t = 0; draw();
+    const t0 = performance.now(), dur = 900;
+    (function frame(now) {
+      state.t = Math.min(1, (now - t0) / dur);
+      draw();
+      if (state.t < 1) requestAnimationFrame(frame);
+    })(t0);
+  }
+  host.append(controls, readout);
+  draw();
+  return host;
+}
+
+/* 3. Eigen-scope: watch A act on a vector you rotate */
+function wEigenScope(A, eigDirs) {
+  const host = el('div', { class: 'viz' });
+  const S = 240, O = S / 2, U = 26;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${S} ${S}`);
+  const readout = el('div', { class: 'readout' });
+  const slider = el('input', { type: 'range', min: 0, max: 360, value: 20, step: 1, oninput: (e) => draw(+e.target.value) });
+  host.append(svg, el('div', { class: 'controls-row' }, el('label', {}, 'rotate the input vector v', slider)), readout);
+
+  function pt(x, y) { return [O + x * U, O - y * U]; }
+  function draw(deg) {
+    const r = deg * Math.PI / 180;
+    const v = [2.6 * Math.cos(r), 2.6 * Math.sin(r)];
+    const Av = [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
+    // is v parallel to an eigen-direction?
+    let onLine = null;
+    for (const [dir, lam] of eigDirs) {
+      const cross = dir[0] * v[1] - dir[1] * v[0];
+      if (Math.abs(cross) / (Math.hypot(...dir) * Math.hypot(...v)) < 0.04) onLine = lam;
+    }
+    let g = `<g class="viz-grid">`;
+    for (let k = -4; k <= 4; k++) g += `<line x1="${O + k * U}" y1="0" x2="${O + k * U}" y2="${S}"/><line x1="0" y1="${O + k * U}" x2="${S}" y2="${O + k * U}"/>`;
+    g += `</g><line class="viz-axis" x1="0" y1="${O}" x2="${S}" y2="${O}"/><line class="viz-axis" x1="${O}" y1="0" x2="${O}" y2="${S}"/>`;
+    // eigen-lines
+    for (const [dir] of eigDirs) {
+      const n = Math.hypot(...dir), ux = dir[0] / n, uy = dir[1] / n;
+      const p1 = pt(ux * 9, uy * 9), p2 = pt(-ux * 9, -uy * 9);
+      g += `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="var(--rule)" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    }
+    const arw = (from, to, col, w, mk) => `<line x1="${from[0]}" y1="${from[1]}" x2="${to[0]}" y2="${to[1]}" stroke="${col}" stroke-width="${w}" marker-end="url(#${mk})"/>`;
+    g = `<defs>
+      <marker id="ahA" markerWidth="8" markerHeight="8" refX="5" refY="3.2" orient="auto"><path d="M0,0 L6,3.2 L0,6 z" fill="var(--accent)"/></marker>
+      <marker id="ahF" markerWidth="8" markerHeight="8" refX="5" refY="3.2" orient="auto"><path d="M0,0 L6,3.2 L0,6 z" fill="var(--flip)"/></marker>
+    </defs>` + g;
+    g += arw(pt(0, 0), pt(...Av), 'var(--flip)', 3, 'ahF');
+    g += arw(pt(0, 0), pt(...v), 'var(--accent)', 3, 'ahA');
+    svg.innerHTML = g;
+    if (onLine != null) {
+      readout.innerHTML = `<b class="pos">v is an eigenvector.</b> Av points the same way &mdash; it is just v scaled by &lambda; = <b>${onLine}</b>. (Av = ${Av.map(x => x.toFixed(1)).join(', ')})`;
+    } else {
+      readout.innerHTML = `v = (${v.map(x => x.toFixed(1)).join(', ')}) &rarr; Av = (${Av.map(x => x.toFixed(1)).join(', ')}). <span class="neg">Direction changed</span> &mdash; not an eigenvector. Rotate v onto a dashed line.`;
+    }
+  }
+  draw(20);
+  return host;
+}
+
+/* 4. Quadratic form: rotate level curve to principal axes */
+function wQuadRotate() {
+  // Q = x^2 + xy + y^2  ->  eigenvalues 3/2, 1/2 ; axes at 45 deg
+  const host = el('div', { class: 'viz' });
+  const S = 240, O = S / 2, U = 60;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${S} ${S}`);
+  const readout = el('div', { class: 'readout' });
+  const slider = el('input', { type: 'range', min: 0, max: 45, value: 0, step: 1, oninput: (e) => draw(+e.target.value) });
+  host.append(svg, el('div', { class: 'controls-row' }, el('label', {}, 'rotate frame towards principal axes (0\u00b0 \u2192 45\u00b0)', slider)), readout);
+
+  function draw(deg) {
+    const phi = deg * Math.PI / 180;
+    // ellipse semi-axes from eigenvalues: lambda X^2 = 1  -> semi-axis 1/sqrt(lambda)
+    const rx = 1 / Math.sqrt(0.5), ry = 1 / Math.sqrt(1.5); // along principal axes
+    let g = `<g class="viz-grid">`;
+    for (let k = -2; k <= 2; k++) g += `<line x1="${O + k * U}" y1="0" x2="${O + k * U}" y2="${S}"/><line x1="0" y1="${O + k * U}" x2="${S}" y2="${O + k * U}"/>`;
+    g += `</g><line class="viz-axis" x1="0" y1="${O}" x2="${S}" y2="${O}"/><line class="viz-axis" x1="${O}" y1="0" x2="${O}" y2="${S}"/>`;
+    // the ellipse is fixed in space, drawn at 45deg; as slider->45 we rotate the whole g so it aligns to axes
+    const rot = -deg; // rotate scene so principal axis meets x-axis
+    g += `<g transform="rotate(${rot} ${O} ${O})">`;
+    g += `<ellipse cx="${O}" cy="${O}" rx="${rx * U}" ry="${ry * U}" transform="rotate(45 ${O} ${O})" fill="var(--accent)" fill-opacity="0.16" stroke="var(--accent)" stroke-width="2"/>`;
+    // principal axes
+    g += `<line x1="${O - rx * U}" y1="${O}" x2="${O + rx * U}" y2="${O}" transform="rotate(45 ${O} ${O})" stroke="var(--teal)" stroke-width="2"/>`;
+    g += `<line x1="${O}" y1="${O - ry * U}" x2="${O}" y2="${O + ry * U}" transform="rotate(45 ${O} ${O})" stroke="var(--teal)" stroke-width="2" stroke-dasharray="4 3"/>`;
+    g += `</g>`;
+    svg.innerHTML = g;
+    if (deg >= 45) readout.innerHTML = `Aligned. In the new variables \\(X=\\tfrac{x+y}{\\sqrt2},\\; Y=\\tfrac{x-y}{\\sqrt2}\\): &nbsp; <b>Q = \\(\\tfrac32 X^2 + \\tfrac12 Y^2\\)</b> &mdash; no cross term, both coefficients &gt; 0, so Q is positive definite (an ellipse).`;
+    else readout.innerHTML = `Q(x,y) = x\u00b2 + xy + y\u00b2. The <b>xy</b> cross-term tilts the ellipse 45\u00b0 off the axes. Rotating to the eigenvectors of A = [1 &frac12; &frac12 1] removes it.`;
+    typeset();
+  }
+  draw(0);
+  return host;
+}
+
+/* 5. Diagonalisation: A = Q D Qᵀ as rotate → stretch → rotate back */
+function wDiagonalise() {
+  const host = el('div', { class: 'viz' });
+  const S = 240, O = 120, U = 25;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${S} ${S}`);
+  const readout = el('div', { class: 'readout' });
+
+  const shape = [[-0.25, -1], [0.25, -1], [0.25, 0.55], [0.95, 0.55], [0.95, 0.95], [0.25, 0.95], [0.25, 1.2], [-0.25, 1.2]];
+  const circ = Array.from({ length: 24 }, (_, i) => [Math.cos(i / 24 * 2 * Math.PI), Math.sin(i / 24 * 2 * Math.PI)]);
+  const r = 0.70711;
+  const I = [[1, 0], [0, 1]];
+  const Qt = [[r, r], [-r, r]], Dm = [[3, 0], [0, 1]], Am = [[2, 1], [1, 2]];
+  const mul = (M, N) => [
+    [M[0][0] * N[0][0] + M[0][1] * N[1][0], M[0][0] * N[0][1] + M[0][1] * N[1][1]],
+    [M[1][0] * N[0][0] + M[1][1] * N[1][0], M[1][0] * N[0][1] + M[1][1] * N[1][1]]
+  ];
+  const ap = (M, p) => [M[0][0] * p[0] + M[0][1] * p[1], M[1][0] * p[0] + M[1][1] * p[1]];
+  const pt = (x, y) => [O + x * U, O - y * U];
+  const ease = t => t < 0.5 ? 2 * t * t : 1 - ((-2 * t + 2) ** 2) / 2;
+
+  let cur = I, phase = 0, showA = false, raf = null;
+  const texts = [
+    'Start: a shape and a ring of dots. \\(A = \\begin{bmatrix}2&1\\\\1&2\\end{bmatrix}\\) has eigenvectors \\((1,1)\\) and \\((1,-1)\\) (the dashed lines), eigenvalues \\(3\\) and \\(1\\).',
+    '<b>Step 1 — \\(Q^{T}\\):</b> rotate so the eigenvectors line up with the axes. The ring is unchanged (a rotation), the shape turns 45°.',
+    '<b>Step 2 — \\(D\\):</b> stretch along the axes by the eigenvalues — ×3 along one, ×1 along the other. The ring becomes an ellipse.',
+    '<b>Step 3 — \\(Q\\):</b> rotate back. The ellipse now lies along the eigenvector \\((1,1)\\). This composite \\(QDQ^{T}\\) is exactly \\(A\\) — tick “compare with \\(A\\)” to check.'
+  ];
+
+  function frame(M) {
+    let g = `<g class="viz-grid">`;
+    for (let k = -3; k <= 3; k++) g += `<line x1="${O + k * U}" y1="0" x2="${O + k * U}" y2="${S}"/><line x1="0" y1="${O + k * U}" x2="${S}" y2="${O + k * U}"/>`;
+    g += `</g><line class="viz-axis" x1="0" y1="${O}" x2="${S}" y2="${O}"/><line class="viz-axis" x1="${O}" y1="0" x2="${O}" y2="${S}"/>`;
+    for (const d of [[1, 1], [1, -1]]) {
+      const n = Math.hypot(...d), p1 = pt(d[0] / n * 3.4, d[1] / n * 3.4), p2 = pt(-d[0] / n * 3.4, -d[1] / n * 3.4);
+      g += `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="var(--rule)" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    }
+    if (showA) {
+      const pA = shape.map(p => pt(...ap(Am, p)).join(',')).join(' ');
+      g += `<polygon points="${pA}" fill="none" stroke="var(--flip)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+    }
+    const poly = shape.map(p => pt(...ap(M, p)).join(',')).join(' ');
+    g += `<polygon points="${poly}" fill="var(--accent)" fill-opacity="0.2" stroke="var(--accent)" stroke-width="2"/>`;
+    for (const p of circ) { const [x, y] = pt(...ap(M, p)); g += `<circle cx="${x}" cy="${y}" r="1.7" fill="var(--teal)"/>`; }
+    svg.innerHTML = g;
+  }
+  function animateTo(M) {
+    if (raf) cancelAnimationFrame(raf);
+    const from = cur.map(row => row.slice()), t0 = performance.now(), dur = 650;
+    (function run(now) {
+      const t = ease(Math.min(1, (now - t0) / dur));
+      const Mt = from.map((row, i) => row.map((v, j) => v + (M[i][j] - v) * t));
+      frame(Mt);
+      if (t < 1) raf = requestAnimationFrame(run); else { cur = M; raf = null; }
+    })(t0);
+  }
+  function setPhase(pnext) {
+    phase = pnext;
+    if (phase === 0) animateTo(I);
+    else if (phase === 1) animateTo(Qt);
+    else if (phase === 2) animateTo(mul(Dm, Qt));
+    else animateTo(mul(Am, I));
+    readout.innerHTML = texts[phase];
+    step.textContent = ['Step 1: rotate (Qᵀ) ▶', 'Step 2: stretch (D) ▶', 'Step 3: rotate back (Q) ▶', 'Done — reset ↺'][phase];
+    typeset();
+  }
+  const step = el('button', { class: 'check', onclick: () => setPhase((phase + 1) % 4) });
+  const cmp = el('label', { style: 'flex-direction:row;gap:6px;align-items:center' },
+    el('input', { type: 'checkbox', onchange: (e) => { showA = e.target.checked; frame(cur); } }), 'compare with A·(shape)');
+  host.append(svg, el('div', { class: 'controls-row' }, step, cmp), readout);
+  setPhase(0);
+  return host;
+}
+
+/* ---------- practice block ---------- */
+function practice({ q, fields, answers, tol = 0.01, steps }) {
+  const host = el('div', { class: 'practice' });
+  host.append(el('div', { class: 'q', html: q }));
+  const inputs = fields.map(f => {
+    const inp = el('input', { placeholder: f.ph || '', 'aria-label': f.label });
+    return { inp, wrap: el('label', {}, f.label, inp), key: f.label };
+  });
+  host.append(el('div', { class: 'fields' }, ...inputs.map(i => i.wrap)));
+  const verdict = el('div', { class: 'verdict' });
+  const reveal = el('div', { class: 'reveal', html: `<b>Worked solution</b><ol>${steps.map(s => `<li>${s}</li>`).join('')}</ol>` });
+  const btn = el('button', { class: 'check' }, 'Check answer');
+  btn.onclick = () => {
+    let allOK = true;
+    inputs.forEach((it, k) => {
+      const raw = it.inp.value.trim().toLowerCase().replace(/[()\s]/g, '');
+      const exp = String(answers[k]).toLowerCase().replace(/[()\s]/g, '');
+      let ok;
+      if (fields[k].dir) {
+        // accept any non-zero scalar multiple (eigenvector direction)
+        const a = raw.split(',').map(Number), b = exp.split(',').map(Number);
+        ok = a.length === b.length && a.every(x => !isNaN(x)) &&
+             Math.hypot(...a) > 1e-9 &&
+             a.every((_, j) => Math.abs(a[j] * b[(j + 1) % b.length] - a[(j + 1) % a.length] * b[j]) < 1e-6);
+      } else {
+        const num = parseFloat(raw), enum_ = parseFloat(exp);
+        ok = (!isNaN(num) && !isNaN(enum_)) ? Math.abs(num - enum_) <= tol : raw === exp;
+      }
+      it.inp.classList.toggle('ok', ok);
+      it.inp.classList.toggle('bad', !ok);
+      if (!ok) allOK = false;
+    });
+    verdict.className = 'verdict ' + (allOK ? 'win' : 'lose');
+    verdict.textContent = allOK ? 'Correct — that is exactly how the marker wants it set out.' : 'Not quite. Open the worked solution and compare each line.';
+    reveal.classList.add('show');
+    typeset();
+  };
+  host.append(el('div', { class: 'step-controls' }, btn), verdict, reveal);
+  return host;
+}
+
+/* ============================ LESSONS ============================ */
+
+const SYS_3x3 = {
+  augCol: 3,
+  steps: [
+    { m: [[1, 2, 1, 4], [2, 3, 1, 7], [1, 1, 2, 5]], text: 'The system \\(x+2y+z=4,\\; 2x+3y+z=7,\\; x+y+2z=5\\) as an augmented matrix \\([A\\,|\\,\\mathbf b]\\). Goal: get \\(A\\) to the identity.' },
+    { m: [[1, 2, 1, 4], [0, -1, -1, -1], [1, 1, 2, 5]], hot: [1], op: 'R\u2082 \u2192 R\u2082 \u2212 2R\u2081', text: 'Kill the leading 2 in row&nbsp;2. Every entry: \\(2-2(1)=0,\\ 3-2(2)=-1,\\ 1-2(1)=-1,\\ 7-2(4)=-1\\).' },
+    { m: [[1, 2, 1, 4], [0, -1, -1, -1], [0, -1, 1, 1]], hot: [2], op: 'R\u2083 \u2192 R\u2083 \u2212 R\u2081', text: 'Clear the 1 below the first pivot in row&nbsp;3.' },
+    { m: [[1, 2, 1, 4], [0, -1, -1, -1], [0, 0, 2, 2]], hot: [2], op: 'R\u2083 \u2192 R\u2083 \u2212 R\u2082', text: 'Now clear column&nbsp;2 below its pivot. Row&nbsp;3 becomes \\((0,0,2\\,|\\,2)\\).' },
+    { m: [[1, 2, 1, 4], [0, -1, -1, -1], [0, 0, 1, 1]], hot: [2], op: 'R\u2083 \u2192 \u00bd R\u2083', text: 'Scale row&nbsp;3 so its pivot is 1. This already tells us \\(z=1\\).' },
+    { m: [[1, 2, 1, 4], [0, -1, 0, 0], [0, 0, 1, 1]], hot: [1], op: 'R\u2082 \u2192 R\u2082 + R\u2083', text: 'Back-substitute: clear the \\(-1\\) above the row-3 pivot.' },
+    { m: [[1, 2, 1, 4], [0, 1, 0, 0], [0, 0, 1, 1]], hot: [1], op: 'R\u2082 \u2192 \u2212R\u2082', text: 'Make the row-2 pivot \\(+1\\). Now \\(y=0\\).' },
+    { m: [[1, 2, 0, 3], [0, 1, 0, 0], [0, 0, 1, 1]], hot: [0], op: 'R\u2081 \u2192 R\u2081 \u2212 R\u2083', text: 'Clear column&nbsp;3 in row&nbsp;1.' },
+    { m: [[1, 0, 0, 3], [0, 1, 0, 0], [0, 0, 1, 1]], hot: [0], op: 'R\u2081 \u2192 R\u2081 \u2212 2R\u2082  \u2713', text: 'Reduced row echelon form. Read straight off: \\(x=3,\\; y=0,\\; z=1\\).' }
+  ]
+};
+
+const SYS_RECT = {
+  augCol: null,
+  steps: [
+    { m: [[1, 2, 0, 1], [2, 4, 1, 3], [1, 2, 1, 2]], text: 'A \\(3\\times4\\) matrix \\(M\\) (a map \\(\\mathbb R^4\\to\\mathbb R^3\\)). We reduce it to find rank, and bases for the three fundamental spaces.' },
+    { m: [[1, 2, 0, 1], [0, 0, 1, 1], [1, 2, 1, 2]], hot: [1], op: 'R\u2082 \u2192 R\u2082 \u2212 2R\u2081', text: 'First pivot is the top-left 1. Clear below it in row&nbsp;2.' },
+    { m: [[1, 2, 0, 1], [0, 0, 1, 1], [0, 0, 1, 1]], hot: [2], op: 'R\u2083 \u2192 R\u2083 \u2212 R\u2081', text: 'Clear below the first pivot in row&nbsp;3. Column&nbsp;2 has no pivot — it will give a free variable.' },
+    { m: [[1, 2, 0, 1], [0, 0, 1, 1], [0, 0, 0, 0]], hot: [2], op: 'R\u2083 \u2192 R\u2083 \u2212 R\u2082  \u2713', text: 'RREF. <b>Pivots in columns 1 and 3</b> \u2192 rank = 2. Free variables \\(x_2,x_4\\) \u2192 nullity = 2. Check: \\(2+2 = 4 = \\dim(\\text{domain})\\).' }
+  ]
+};
+
+const EIGEN_STEPS = [
+  { text: '<b>The recurrence.</b> \\(x_n = 3x_{n-1} - 2x_{n-2}\\), with \\(x_0=2,\\ x_1=3\\). We want a formula for \\(x_n\\) with no recursion.', op: 'set up' },
+  { text: '<b>Make it first-order.</b> Let \\(y_n = x_{n-1}\\). Then \\(\\begin{bmatrix}x_n\\\\ y_n\\end{bmatrix} = \\begin{bmatrix}3 & -2\\\\ 1 & 0\\end{bmatrix}\\begin{bmatrix}x_{n-1}\\\\ y_{n-1}\\end{bmatrix}\\). Call the matrix \\(A\\).', op: 'A = [[3,-2],[1,0]]' },
+  { text: '<b>Characteristic polynomial.</b> \\(\\det(A - kI) = \\det\\begin{bmatrix}3-k & -2\\\\ 1 & -k\\end{bmatrix} = (3-k)(-k) + 2 = k^2 - 3k + 2\\).', op: '\u03c7_A(k) = k\u00b2 \u2212 3k + 2' },
+  { text: '<b>Eigenvalues.</b> \\(k^2 - 3k + 2 = (k-1)(k-2) = 0 \\Rightarrow k = 1,\\ 2\\).', op: '\u03bb = 1, 2' },
+  { text: '<b>Eigenvectors.</b> For \\(k=1\\): \\((A-I)\\mathbf v = \\begin{bmatrix}2&-2\\\\1&-1\\end{bmatrix}\\mathbf v = 0 \\Rightarrow \\mathbf v_1 = \\begin{bmatrix}1\\\\1\\end{bmatrix}\\). For \\(k=2\\): \\(\\begin{bmatrix}1&-2\\\\1&-2\\end{bmatrix}\\mathbf v = 0 \\Rightarrow \\mathbf v_2 = \\begin{bmatrix}2\\\\1\\end{bmatrix}\\).', op: 'v\u2081 = (1,1), v\u2082 = (2,1)' },
+  { text: '<b>Diagonalise.</b> \\(Q = \\begin{bmatrix}1&2\\\\1&1\\end{bmatrix},\\ D = \\begin{bmatrix}1&0\\\\0&2\\end{bmatrix},\\ Q^{-1} = \\begin{bmatrix}-1&2\\\\1&-1\\end{bmatrix}\\), and \\(A = QDQ^{-1}\\).', op: 'A = QDQ\u207b\u00b9' },
+  { text: '<b>Closed form.</b> Because \\(A = QDQ^{-1}\\), \\(A^n = QD^nQ^{-1}\\), and \\(D^n = \\begin{bmatrix}1^n&0\\\\0&2^n\\end{bmatrix}\\). So \\(x_n = \\alpha\\,(1)^n + \\beta\\,(2)^n\\). Fit the data: \\(\\alpha+\\beta = 2\\), \\(\\alpha + 2\\beta = 3 \\Rightarrow \\beta = 1,\\ \\alpha = 1\\).', op: 'x_n = A(1)\u207f + B(2)\u207f' },
+  { text: '<b>Answer.</b> \\(x_n = 1 + 2^n\\). Check: \\(x_2 = 3(3)-2(2) = 5\\), and \\(1 + 2^2 = 5\\). \u2713', op: 'x_n = 1 + 2\u207f' },
+  { text: '<b>Long-run ratio.</b> The \\(2^n\\) term dominates, so \\(x_n / x_{n-1} \\to 2\\), the largest eigenvalue. The state vector lines up with the dominant eigenvector \\((2,1)\\).', op: 'x_n / x_{n\u22121} \u2192 2' }
+];
+
+const QUAD_STEPS = [
+  { text: '<b>Symmetric matrix.</b> \\(Q(x,y,z) = 3x^2 - y^2 - z^2 + 6xy + 6xz + 2yz\\). Diagonal entries are the square coefficients; each off-diagonal is <em>half</em> the cross coefficient. \\(A = \\begin{bmatrix}3&3&3\\\\3&-1&1\\\\3&1&-1\\end{bmatrix}\\).', op: 'Q = v\u1d40 A v' },
+  { text: '<b>Characteristic polynomial.</b> Expanding \\(\\det(A - kI)\\) gives \\(-(k-6)(k+3)(k+2)\\). (This is the 2019 paper — the eigenvalues are stated as a check.)', op: '\u03c7_A' },
+  { text: '<b>Eigenvalues.</b> \\(k = 6,\\ -3,\\ -2\\). Mixed signs already tell you the form is <b>indefinite</b>.', op: '\u03bb = 6, \u22123, \u22122' },
+  { text: '<b>Eigenvectors</b> (solve \\((A-kI)\\mathbf v = 0\\) for each): \\(\\mathbf v_{6} = (2,1,1)\\), \\(\\mathbf v_{-3} = (-1,1,1)\\), \\(\\mathbf v_{-2} = (0,1,-1)\\). They are mutually orthogonal (dot products all 0) — guaranteed because \\(A\\) is symmetric.', op: 'orthogonal eigenvectors' },
+  { text: '<b>Orthonormal + \\(\\hat P\\).</b> Normalise: divide each by its length (\\(\\sqrt6,\\sqrt3,\\sqrt2\\)). Put them in columns to get \\(\\hat P\\); then \\(\\hat P^{T}\\!A\\,\\hat P = D = \\operatorname{diag}(6,-3,-2)\\), i.e. \\(A = \\hat P D \\hat P^{T}\\).', op: 'A = P\u0302 D P\u0302\u1d40' },
+  { text: '<b>Diagonal form.</b> With \\(\\mathbf V = \\hat P^{T}\\mathbf v\\), \\(Q = 6X^2 - 3Y^2 - 2Z^2\\). No cross terms.', op: 'Q = 6X\u00b2 \u2212 3Y\u00b2 \u2212 2Z\u00b2' },
+  { text: '<b>Sylvester check (fast marks).</b> Leading minors of \\(A\\): \\(D_1 = 3 > 0\\); \\(D_2 = \\det\\begin{bmatrix}3&3\\\\3&-1\\end{bmatrix} = -12 < 0\\). Signs don\u2019t match the +,+,+ (pos. def.) or \u2212,+,\u2212 (neg. def.) pattern \u2192 <b>indefinite</b>, agreeing with the eigenvalues.', op: 'indefinite' }
+];
+
+const LESSONS = [
+  {
+    id: 'l1', q: 'Q2', title: 'Row reduction, rank & nullity',
+    blurb: 'The most reliable 25 marks in the paper. A fixed algorithm: reduce, read off solutions, then bases for row/column/kernel space.',
+    build: () => [
+      block('30-second intuition', [
+        p('Row reduction is just doing the same three moves to every equation until each variable is isolated: <b>swap</b> two rows, <b>scale</b> a row, or <b>add a multiple</b> of one row to another. None of them change the solution set.'),
+        p('Once the left block is the identity (or as close as it gets), everything else falls out mechanically: the solution, the <b>rank</b> (number of pivots), the <b>nullity</b> (number of pivot-free columns), and bases for the three spaces the marker asks about.')
+      ]),
+      block('Animated worked example — a 3×3 system', [
+        p('Step through each row operation. The changed row is highlighted; the label above the caption is the exact notation the marker wants to see written beside your working.'),
+        wRowReduce(SYS_3x3)
+      ]),
+      block('Same machine, rectangular matrix — reading off the spaces', [
+        p('For a non-square \\(M\\) you reduce identically, then read off:'),
+        el('ul', { class: '', html: `
+          <li><b>rank</b> = number of pivot columns; <b>nullity</b> = number of non-pivot columns.</li>
+          <li><b>Row space basis</b> = the non-zero rows of the RREF.</li>
+          <li><b>Column space basis</b> = the columns of the <em>original</em> \\(M\\) in the pivot positions (never the RREF columns).</li>
+          <li><b>Kernel basis</b> = solve \\(M\\mathbf x = \\mathbf 0\\); set each free variable to 1 in turn.</li>` }),
+        wRowReduce(SYS_RECT),
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 8px"><b>Reading this RREF</b> &nbsp;\\(\\begin{bmatrix}1&2&0&1\\\\0&0&1&1\\\\0&0&0&0\\end{bmatrix}\\):</p>
+          <p style="margin:0 0 6px">Row space: \\(\\{(1,2,0,1),\\,(0,0,1,1)\\}\\) &nbsp;&mdash;&nbsp; Column space: \\(\\{(1,2,1),\\,(0,1,1)\\}\\) (cols 1, 3 of \\(M\\)).</p>
+          <p style="margin:0 0 6px">Kernel: \\(x_2=s,\\ x_4=t\\) free; \\(x_1 = -2s-t,\\ x_3 = -t\\). Basis \\(\\{(-2,1,0,0),\\,(-1,0,-1,1)\\}\\).</p>
+          <p style="margin:0"><b>Dimension Theorem:</b> \\(\\operatorname{rank} + \\operatorname{nullity} = 2 + 2 = 4 = \\dim(\\text{domain})\\). \u2713</p>` })
+      ]),
+      block('Two spin-off parts that recur', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 8px"><b>"Find a condition on \\(a, b, c\\) for consistency."</b> Row-reduce the augmented matrix with symbols on the right. If a row becomes \\((0\\ 0\\ 0 \\mid \\text{expression})\\), the system is consistent only when that expression \\(= 0\\). That equation is the condition.</p>
+          <p style="margin:0"><b>"Write \\(\\mathbf w\\) as a linear combination of the column-space basis."</b> Solve \\(A\\mathbf x = \\mathbf w\\); the entries of any solution \\(\\mathbf x\\) are the coefficients. Because \\(\\mathbf w\\) is the right-hand side, a solution exists exactly when the system is consistent \u2014 that is the link the question is testing.</p>` })
+      ]),
+      block('Your turn', [
+        practice({
+          q: 'Solve \\(x+y+z=6,\\ \\ 2x+y-z=1,\\ \\ x+2y+3z=14\\). Enter \\(x,y,z\\).',
+          fields: [{ label: 'x' }, { label: 'y' }, { label: 'z' }],
+          answers: [1, 2, 3],
+          steps: [
+            '\\(R_2 \\to R_2 - 2R_1:\\ (0,-1,-3\\,|\\,-11)\\).',
+            '\\(R_3 \\to R_3 - R_1:\\ (0,1,2\\,|\\,8)\\).',
+            '\\(R_3 \\to R_3 + R_2:\\ (0,0,-1\\,|\\,-3)\\Rightarrow z = 3\\).',
+            'Back-sub into row 2: \\(-y - 3(3) = -11 \\Rightarrow y = 2\\).',
+            'Row 1: \\(x + 2 + 3 = 6 \\Rightarrow x = 1\\). Solution \\((1,2,3)\\).'
+          ]
+        })
+      ]),
+      techBlock([
+        '<b>Write every row operation</b> in the margin (\\(R_2\\to R_2-2R_1\\)). "Solutions without working might not receive full marks" is printed on the paper — the operations <em>are</em> the working.',
+        '<b>Column space uses original columns.</b> A very common lost mark: students quote the RREF pivot columns. Take the pivot-position columns from the matrix you started with.',
+        '<b>State the Dimension Theorem</b> in words (\\(\\operatorname{rank}(A) + \\operatorname{nullity}(A) = n\\), the number of columns) and then plug in numbers. Both halves score.',
+        '<b>Kernel from the homogeneous system.</b> Reuse your RREF, drop the constants, set free variables to convenient values (even \u201c\\(z=-13\\)\u201d to clear fractions, as the model solutions do).',
+        '<b>Rank vs consistency:</b> \\(\\operatorname{rank}(A) = \\operatorname{rank}(A\\,|\\,\\mathbf b) = n\\) \u2192 unique; \\(= \\operatorname{rank} < n\\) \u2192 infinitely many; \\(\\operatorname{rank}(A) < \\operatorname{rank}(A\\,|\\,\\mathbf b)\\) \u2192 none.'
+      ])
+    ]
+  },
+
+  {
+    id: 'l2', q: 'Q1', title: 'Matrices for linear maps & composition',
+    blurb: 'Write A and B straight from a formula, multiply for the composite, and change basis with B = Q⁻¹AQ.',
+    build: () => [
+      block('30-second intuition', [
+        p('A linear map is completely pinned down by what it does to the basis vectors. The matrix \\(A\\) is just those images written as <b>columns</b>: column \\(j\\) is \\(f(\\mathbf e_j)\\).'),
+        p('Composition of maps is multiplication of matrices, in the same order: \\((q\\circ p)\\) has matrix \\(BA\\) (do \\(p\\) first, so \\(A\\) sits on the right, next to the vector).')
+      ]),
+      block('Worked example — straight from the 2024 paper', [
+        stepper([
+          { op: 'read off A', text: '\\(p(x,y,z) = (x-y,\\ 2x+z,\\ 3y-2z)\\). Each output row gives a row of \\(A\\): coefficients of \\(x,y,z\\). \\(A = \\begin{bmatrix}1&-1&0\\\\2&0&1\\\\0&3&-2\\end{bmatrix}\\).' },
+          { op: 'read off B', text: '\\(q(x,y,z) = (4x-2y+z,\\ x+7y+z)\\Rightarrow B = \\begin{bmatrix}4&-2&1\\\\1&7&1\\end{bmatrix}\\) (a \\(2\\times3\\) matrix: \\(\\mathbb R^3\\to\\mathbb R^2\\)).' },
+          { op: 'C = BA', text: 'Composite \\(q\\circ p\\): multiply \\(B\\,(2\\times3)\\) by \\(A\\,(3\\times3)\\). Row 1: \\((4,-2,1)\\cdot\\text{cols of }A = (0,-1,-4)\\). Row 2: \\((1,7,1)\\cdot\\text{cols} = (15,2,5)\\). So \\(C = \\begin{bmatrix}0&-1&-4\\\\15&2&5\\end{bmatrix}\\).' },
+          { op: 'det A \u2192 geometry', text: '\\(\\det A = 1(0\\cdot-2 - 1\\cdot3) - (-1)(2\\cdot-2 - 1\\cdot0) + 0 = -3 - 4 = -7\\). So \\(p\\) scales volume by \\(|{-7}| = 7\\) and, since \\(\\det A < 0\\), <b>reverses orientation</b>.' },
+          { op: 'change of basis', text: 'To represent \\(p\\) in a new basis with change-of-basis matrix \\(Q\\) (new-basis columns): \\(M = Q^{-1} A Q\\). \\(Q\\) converts new\u2192standard; \\(Q^{-1}\\) converts standard\u2192new.' }
+        ], { render: () => el('div') })
+      ]),
+      block('Determinant as area / volume — drag the entries', [
+        p('The unit square has area 1. Under \\(M = \\begin{bmatrix}a&b\\\\c&d\\end{bmatrix}\\) it becomes a parallelogram of area \\(|\\det M|\\). Sign of \\(\\det M\\): <span style="color:var(--teal)">+ keeps orientation</span>, <span style="color:var(--flip)">\u2212 flips it</span> (the square gets turned over).'),
+        wDetTransform({ a: 2, b: 1, c: 0, d: 3 })
+      ]),
+      block('Your turn', [
+        practice({
+          q: 'For \\(A = \\begin{bmatrix}1&-1&0\\\\2&0&1\\\\0&3&-2\\end{bmatrix}\\), give \\(\\det A\\), the volume scale factor, and the orientation (type "preserved" or "reversed").',
+          fields: [{ label: 'det A' }, { label: 'volume x' }, { label: 'orientation' }],
+          answers: [-7, 7, 'reversed'],
+          steps: [
+            'Expand along row 1: \\(1\\,(0\\cdot(-2) - 1\\cdot3) - (-1)\\,(2\\cdot(-2) - 1\\cdot0) + 0\\).',
+            '\\(= 1(-3) + 1(-4) + 0 = -7\\).',
+            'Volume scales by \\(|\\det A| = 7\\); \\(\\det A < 0\\) so orientation is reversed.'
+          ]
+        })
+      ]),
+      techBlock([
+        '<b>Columns, not rows.</b> If you build \\(A\\) so that \\(A\\mathbf e_j = f(\\mathbf e_j)\\), the coefficients of the \\(j\\)-th output slot down column \\(j\\). Writing them as rows is the classic transpose slip.',
+        '<b>Order of composition:</b> \\(q\\circ p\\) means "\\(p\\) then \\(q\\)", matrix \\(BA\\). Check the inner dimensions match before you multiply.',
+        '<b>Answer both parts of "effect on area/volume and orientation":</b> the number \\(|\\det|\\) <em>and</em> the sign. One mark each.',
+        '<b>Change of basis:</b> state which way \\(Q\\) goes. Convention on this paper: \\(Q\\) has the new basis vectors as columns and converts new\u2192standard, so the new matrix is \\(Q^{-1}AQ\\).'
+      ])
+    ]
+  },
+
+  {
+    id: 'l3', q: 'Q3', title: 'Eigenvalues, diagonalisation & difference equations',
+    blurb: 'One long recipe worth 25 marks: recurrence → matrix → eigen-stuff → A = QDQ⁻¹ → closed form → limiting ratio.',
+    build: () => [
+      block('30-second intuition', [
+        p('An <b>eigenvector</b> of \\(A\\) is a direction that \\(A\\) does not rotate — it only stretches it, by the <b>eigenvalue</b> \\(\\lambda\\): \\(A\\mathbf v = \\lambda\\mathbf v\\).'),
+        p('If you can find a full set of eigenvectors, then in that basis \\(A\\) is just a diagonal "stretch" \\(D\\). That is \\(A = QDQ^{-1}\\): change to the eigenbasis, stretch along each axis, change back. Powers become easy: \\(A^n = QD^nQ^{-1}\\), and \\(D^n\\) is just each \\(\\lambda^n\\).')
+      ]),
+      block('See it: an eigenvector stays on its own line', [
+        p('Rotate the input vector \\(\\mathbf v\\) (amber). Its image \\(A\\mathbf v\\) (red) is drawn from the same origin. On a dashed line, \\(A\\mathbf v\\) is just \\(\\mathbf v\\) rescaled — that direction is an eigenvector. Anywhere else, the red arrow swings away. Here \\(A = \\begin{bmatrix}3&-2\\\\1&0\\end{bmatrix}\\), eigenvalues \\(1\\) and \\(2\\).'),
+        wEigenScope([[3, -2], [1, 0]], [[[1, 1], 1], [[2, 1], 2]])
+      ]),
+      block('See it: A = QDQᵀ is “rotate → stretch → rotate back”', [
+        p('Diagonalising is a change of viewpoint. Rotate so the eigenvectors are the axes (\\(Q^{T}\\)), stretch along those axes by the eigenvalues (\\(D\\)), rotate back (\\(Q\\)). Do all three and you have done exactly what \\(A\\) does — which is why \\(A^n = QD^nQ^{-1}\\) makes powers trivial.'),
+        wDiagonalise()
+      ]),
+      block('Animated worked example — a second-order recurrence', [
+        p('\\(x_n = 3x_{n-1} - 2x_{n-2}\\), \\(x_0 = 2,\\ x_1 = 3\\). Step through the whole method the exam wants.'),
+        stepper(EIGEN_STEPS, { render: () => el('div') }),
+        el('div', { class: 'callout', html: '<h4>If the matrix is a transition / stochastic matrix</h4><p style="margin:0;font-size:.92rem;color:var(--ink-soft)">(2021 paper) One eigenvalue is always \\(\\lambda = 1\\). The state after \\(m\\) years is \\(A^m \\mathbf v_0\\); the <b>long-run proportions</b> are the dominant eigenvector (the one for \\(\\lambda = 1\\)), normalised so its entries sum to the total population.</p>' })
+      ]),
+      block('Your turn', [
+        practice({
+          q: 'For \\(A = \\begin{bmatrix}4&1\\\\2&3\\end{bmatrix}\\): enter the two eigenvalues (smaller first), then an eigenvector for the larger one as "p,q".',
+          fields: [{ label: '\u03bb small' }, { label: '\u03bb large' }, { label: 'v for \u03bb large', dir: true }],
+          answers: [2, 5, '1,1'],
+          steps: [
+            '\\(\\det(A - kI) = (4-k)(3-k) - (1)(2) = k^2 - 7k + 10\\).',
+            '\\(= (k-2)(k-5) \\Rightarrow \\lambda = 2,\\ 5\\).',
+            'For \\(\\lambda = 5\\): \\((A - 5I)\\mathbf v = \\begin{bmatrix}-1&1\\\\2&-2\\end{bmatrix}\\mathbf v = 0 \\Rightarrow p = q\\), e.g. \\(\\mathbf v = (1,1)\\).',
+            '(For \\(\\lambda = 2\\): \\(\\begin{bmatrix}2&1\\\\2&1\\end{bmatrix}\\mathbf v = 0 \\Rightarrow \\mathbf v = (1,-2)\\).)'
+          ]
+        })
+      ]),
+      techBlock([
+        '<b>\\(k\\)-th order \u2192 \\(k\\times k\\) system:</b> introduce \\(y_n = x_{n-1}\\) (and \\(z_n = x_{n-2}\\), \u2026). The coefficient matrix is a companion matrix — top row is the coefficients, then a shifted identity below.',
+        '<b>Verify given eigenvalues by substitution</b> when the paper hands them to you (\u201cverify \\(A\\) has eigenvalues 1, 2, 3\u201d): plug each into \\(\\chi_A(k)\\) and show it is 0. Fast, full marks.',
+        '<b>\\(Q\\) has eigenvectors as columns; \\(D\\) has eigenvalues in the matching order.</b> Get the order consistent or \\(A = QDQ^{-1}\\) fails.',
+        '<b>Closed form shortcut:</b> once you have the eigenvalues, write \\(x_n = \\alpha\\lambda_1^n + \\beta\\lambda_2^n\\) and fit \\(\\alpha,\\beta\\) from \\(x_0,x_1\\). You do not have to multiply the three matrices out unless asked for \\(Q^{-1}\\).',
+        '<b>Long-run ratio</b> \\(\\to\\) the dominant (largest \\(|\\lambda|\\)) eigenvalue; the state vector aligns with its eigenvector. State both.'
+      ])
+    ]
+  },
+
+  {
+    id: 'l4', q: 'Q5', title: 'Quadratic forms & orthogonal diagonalisation',
+    blurb: 'Symmetric matrix → eigen-decomposition → diagonal form → definiteness. Sylvester\u2019s test alone is ~5 easy marks.',
+    build: () => [
+      block('30-second intuition', [
+        p('A quadratic form \\(Q(\\mathbf v) = \\mathbf v^{T}\\!A\\,\\mathbf v\\) with \\(A\\) symmetric. The cross terms (\\(xy\\), \\(xz\\), \u2026) come from the off-diagonal entries — each is <b>half</b> the coefficient in \\(Q\\).'),
+        p('Because \\(A\\) is symmetric it has an <b>orthonormal</b> eigenbasis. Rotating into it (\\(\\mathbf V = \\hat P^{T}\\mathbf v\\)) removes every cross term: \\(Q = \\lambda_1 X^2 + \\lambda_2 Y^2 + \\cdots\\). The signs of the \\(\\lambda\\)\u2019s <em>are</em> the definiteness.')
+      ]),
+      block('See it: rotating a tilted ellipse onto its axes', [
+        p('The \\(xy\\) term tilts the level curve of \\(Q = x^2 + xy + y^2\\) by \\(45^\\circ\\). Slide to rotate the frame onto the eigenvectors of \\(A = \\begin{bmatrix}1&\\tfrac12\\\\\\tfrac12&1\\end{bmatrix}\\).'),
+        wQuadRotate()
+      ]),
+      block('Animated worked example — a 3-variable form (2019 paper)', [
+        stepper(QUAD_STEPS, { render: () => el('div') })
+      ]),
+      block('Definiteness — two tests, quote both', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 8px"><b>Eigenvalue test</b> (needs the eigenvalues):</p>
+          <ul style="margin:0 0 12px">
+            <li>all \\(\\lambda_i > 0\\) \u2192 positive definite &nbsp;·&nbsp; all \\(\\lambda_i < 0\\) \u2192 negative definite</li>
+            <li>all \\(\\ge 0\\) (some \\(=0\\)) \u2192 positive semidefinite &nbsp;·&nbsp; mixed signs \u2192 indefinite</li>
+          </ul>
+          <p style="margin:0 0 8px"><b>Sylvester\u2019s criterion / leading principal minors</b> \\(D_1, D_2, \\dots, D_n\\):</p>
+          <ul style="margin:0">
+            <li>\\(D_1, D_2, \\dots, D_n\\) all \\(> 0\\) \u2192 positive definite</li>
+            <li>signs alternate \\(-,+,-,\\dots\\) (i.e. \\((-1)^k D_k > 0\\)) \u2192 negative definite</li>
+            <li>neither pattern, all \\(D_k \\ne 0\\) \u2192 indefinite</li>
+          </ul>` })
+      ]),
+      block('Your turn', [
+        practice({
+          q: 'For \\(Q(x,y) = 5x^2 + 4xy + 5y^2\\): give the symmetric matrix\u2019s two eigenvalues (smaller first) and the definiteness (type "positive definite", "negative definite" or "indefinite").',
+          fields: [{ label: '\u03bb small' }, { label: '\u03bb large' }, { label: 'definiteness' }],
+          answers: [3, 7, 'positive definite'],
+          steps: [
+            '\\(A = \\begin{bmatrix}5&2\\\\2&5\\end{bmatrix}\\) (off-diagonal = \\(\\tfrac12(4) = 2\\)).',
+            '\\(\\det(A - kI) = (5-k)^2 - 4 = k^2 - 10k + 21 = (k-3)(k-7)\\Rightarrow \\lambda = 3, 7\\).',
+            'Both eigenvalues \\(> 0\\) \u2192 positive definite.',
+            'Sylvester check: \\(D_1 = 5 > 0\\), \\(D_2 = 25 - 4 = 21 > 0\\). Same conclusion.'
+          ]
+        })
+      ]),
+      techBlock([
+        '<b>Halve the cross terms</b> when building \\(A\\). \\(6xy\\) gives off-diagonal entries \\(3\\) and \\(3\\), not \\(6\\). Undoing this is the most common Q5 error.',
+        '<b>Normalise before you call it \\(\\hat P\\).</b> \\(\\hat P\\) must have unit-length orthogonal columns so that \\(\\hat P^{T} = \\hat P^{-1}\\) and \\(A = \\hat P D \\hat P^{T}\\).',
+        '<b>Give the new variables explicitly:</b> \\(X = \\hat P^{T}\\mathbf v\\) row by row, e.g. \\(X = \\tfrac{1}{\\sqrt2}(x+y)\\). "Express \\(Q\\) in diagonal form" wants both the form and these substitutions.',
+        '<b>Symmetric \u2192 eigenvectors for distinct eigenvalues are automatically orthogonal.</b> Worth stating; you still \u201cverify\u201d with dot products for the marks.',
+        '<b>Do the Sylvester test even if you already used eigenvalues</b> — the paper often asks for it by name and it is quick, self-contained marks.'
+      ])
+    ]
+  },
+
+  {
+    id: 'l8', q: 'Q1 & Q2', title: 'Determinants, elementary matrices & 2×2 geometry',
+    blurb: 'Bookwork marks that show up in Q1 and Q2 every year: cofactor expansion, how row ops change det, elementary matrices, rotations/reflections, trace.',
+    build: () => [
+      block('30-second intuition', [
+        p('\\(\\det A\\) is the factor by which the map scales area/volume; its <b>sign</b> is orientation (+ keeps it, − flips it). \\(\\det A = 0\\) means the map squashes space flat — equivalently the columns are linearly dependent, \\(A\\) is not invertible, and \\(0\\) is an eigenvalue. Quote whichever phrasing the question uses.')
+      ]),
+      block('Cofactor expansion of a 3×3', [
+        p('Expand along any row or column — pick the one with the most zeros. Each term is (entry) × (±) × (2×2 determinant with that entry’s row and column deleted). The sign is \\((-1)^{i+j}\\), giving the checkerboard \\(\\begin{smallmatrix}+&-&+\\\\-&+&-\\\\+&-&+\\end{smallmatrix}\\).'),
+        stepper([
+          { op: 'expand along row 1', text: '\\(A = \\begin{bmatrix}1&-1&0\\\\2&0&1\\\\0&3&-2\\end{bmatrix}\\). Row 1 has a zero, so use it: \\(\\det A = (+1)\\,\\bigl|\\begin{smallmatrix}0&1\\\\3&-2\\end{smallmatrix}\\bigr| \\;-\\;(-1)\\,\\bigl|\\begin{smallmatrix}2&1\\\\0&-2\\end{smallmatrix}\\bigr| \\;+\\;(0)\\,(\\dots)\\).' },
+          { op: 'evaluate 2×2s', text: '\\(\\bigl|\\begin{smallmatrix}0&1\\\\3&-2\\end{smallmatrix}\\bigr| = 0(-2) - 1(3) = -3\\). \\(\\bigl|\\begin{smallmatrix}2&1\\\\0&-2\\end{smallmatrix}\\bigr| = 2(-2) - 1(0) = -4\\).' },
+          { op: 'combine', text: '\\(\\det A = 1(-3) + 1(-4) + 0 = -7\\). So the map scales volume by \\(7\\) and reverses orientation.' }
+        ], { render: () => el('div') })
+      ]),
+      block('How each row operation changes det — and why', [
+        el('div', { class: 'stage', html: `
+          <table class="mtx" style="width:100%"><tr><td style="text-align:left">Type 1 &nbsp; \\(R_i \\leftrightarrow R_j\\) (swap)</td><td>\\(\\det \\to -\\det\\)</td></tr>
+          <tr><td style="text-align:left">Type 2 &nbsp; \\(R_i \\to kR_i\\) (scale)</td><td>\\(\\det \\to k\\det\\)</td></tr>
+          <tr><td style="text-align:left">Type 3 &nbsp; \\(R_i \\to R_i + kR_j\\)</td><td>\\(\\det\\) unchanged</td></tr></table>
+          <p style="margin:12px 0 0"><b>One-line reason.</b> Each row op is the same as left-multiplying by an <em>elementary matrix</em> \\(E\\) (below), and \\(\\det(EM) = \\det(E)\\det(M)\\). The three \\(E\\)’s have determinant \\(-1\\), \\(k\\) and \\(1\\) respectively.</p>` })
+      ]),
+      block('Elementary matrices — "do the row op to the identity"', [
+        p('To find \\(B\\) with \\(BM = A\\) (where \\(A\\) is \\(M\\) after one row op): apply that same row op to \\(I\\). That’s \\(B\\). Straight from the 2024 paper, for \\(M = \\begin{bmatrix}a&b&c\\\\d&e&f\\\\g&h&i\\end{bmatrix}\\):'),
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px">\\(R_1 \\leftrightarrow R_2\\): &nbsp; \\(B_1 = \\begin{bmatrix}0&1&0\\\\1&0&0\\\\0&0&1\\end{bmatrix}\\) &nbsp; (\\(\\det B_1 = -1\\))</p>
+          <p style="margin:0 0 6px">\\(R_2 \\to kR_2\\): &nbsp; \\(B_2 = \\begin{bmatrix}1&0&0\\\\0&k&0\\\\0&0&1\\end{bmatrix}\\) &nbsp; (\\(\\det B_2 = k\\))</p>
+          <p style="margin:0">\\(R_3 \\to R_3 + kR_2\\): &nbsp; \\(B_3 = \\begin{bmatrix}1&0&0\\\\0&1&0\\\\0&k&1\\end{bmatrix}\\) &nbsp; (\\(\\det B_3 = 1\\))</p>` })
+      ]),
+      block('2×2 geometry: rotations, reflections, and Rᵐ = I', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 8px"><b>Rotation</b> by \\(\\theta\\): \\(R = \\begin{bmatrix}\\cos\\theta & -\\sin\\theta\\\\ \\sin\\theta & \\cos\\theta\\end{bmatrix}\\), \\(\\det R = \\cos^2\\theta + \\sin^2\\theta = 1\\) → area and orientation preserved. \\(R^m = I\\) when \\(m\\theta\\) is a full turn: smallest \\(m = 2\\pi/\\theta\\). E.g. \\(\\theta = 45^\\circ \\Rightarrow m = 8\\); \\(\\theta = 60^\\circ \\Rightarrow m = 6\\).</p>
+          <p style="margin:0"><b>Reflection</b>, e.g. \\(S = \\begin{bmatrix}1&0\\\\0&-1\\end{bmatrix}\\) (in the \\(x\\)-axis): \\(\\det S = -1\\) → area preserved, <b>orientation reversed</b>. Any reflection satisfies \\(S^2 = I\\), so \\(n = 2\\).</p>` })
+      ]),
+      block('"det A = 0 ⟺ columns are linearly dependent" (2020 / 2021 / 2023)', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px"><b>If the columns are dependent</b>, one column is a combination of the others. A type-3 column operation (subtract that combination) makes a column all zeros without changing the determinant. A matrix with a zero column has \\(\\det = 0\\). So dependent columns \\(\\Rightarrow \\det A = 0\\).</p>
+          <p style="margin:0 0 6px"><b>Conversely, if \\(\\det A = 0\\)</b>, \\(A\\) is not invertible, so \\(A\\mathbf x = \\mathbf 0\\) has a non-trivial solution \\(\\mathbf x\\). That solution is a non-zero set of coefficients making the columns sum to \\(\\mathbf 0\\) — i.e. the columns are dependent.</p>
+          <p style="margin:0">Chain to quote: \\(\\det A = 0 \\iff A\\) singular \\(\\iff\\) columns (and rows) linearly dependent \\(\\iff\\) \\(0\\) is an eigenvalue \\(\\iff\\) \\(\\ker A \\ne \\{\\mathbf 0\\}\\).</p>` })
+      ]),
+      block('Trace — a quick sanity check on eigenvalues', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px">\\(\\operatorname{tr}(A)\\) = sum of the diagonal. Two facts worth carrying:</p>
+          <p style="margin:0 0 6px">\\(\\operatorname{tr}(AB) = \\operatorname{tr}(BA)\\) (both equal \\(\\sum_i\\sum_j a_{ij}b_{ji}\\)), hence \\(\\operatorname{tr}(Q^{-1}AQ) = \\operatorname{tr}(AQ\\,Q^{-1}) = \\operatorname{tr}(A)\\) — trace is similarity-invariant.</p>
+          <p style="margin:0">So \\(\\operatorname{tr}(A) = \\sum \\lambda_i\\) and \\(\\det(A) = \\prod \\lambda_i\\). After finding eigenvalues, check they add to the trace and multiply to the determinant.</p>` })
+      ]),
+      block('Your turn', [
+        practice({
+          q: 'Let \\(A = \\begin{bmatrix}2&1&3\\\\0&4&-1\\\\1&0&2\\end{bmatrix}\\). Give \\(\\det A\\) (expand along column 1). Then: what is \\(\\det\\) after \\(R_1 \\leftrightarrow R_3\\)? And after \\(R_2 \\to 5R_2\\) (on the original \\(A\\))?',
+          fields: [{ label: 'det A' }, { label: 'after swap' }, { label: 'after 5R2' }],
+          answers: [3, -3, 15],
+          steps: [
+            'Column 1 entries \\(2, 0, 1\\) with signs \\(+, -, +\\).',
+            '\\(\\det A = 2\\,\\bigl|\\begin{smallmatrix}4&-1\\\\0&2\\end{smallmatrix}\\bigr| - 0 + 1\\,\\bigl|\\begin{smallmatrix}1&3\\\\4&-1\\end{smallmatrix}\\bigr|\\).',
+            '\\(= 2(8 - 0) + 1(-1 - 12) = 16 - 13 = 3\\).',
+            'Type-1 swap multiplies det by \\(-1\\): \\(-3\\).',
+            'Type-2 scaling by 5 multiplies det by 5: \\(15\\).'
+          ]
+        })
+      ]),
+      techBlock([
+        '<b>Expand along the row or column with the most zeros</b> — fewer 2×2 determinants to compute.',
+        '<b>The cofactor sign is \\((-1)^{i+j}\\)</b>, not just alternating along your expansion. Write the \\(+\\,-\\,+\\) pattern in the margin first.',
+        '<b>"Describe the effect of each row operation on the determinant" is bookwork</b> — the three lines plus "because \\(\\det(EM)=\\det E\\,\\det M\\)". Learn it word for word.',
+        '<b>Elementary matrix = the identity with that one row operation applied.</b> Then check \\(BM = A\\) by multiplying.',
+        '<b>\\(\\det = 0\\)</b> ⇔ columns dependent ⇔ not invertible ⇔ \\(0\\) is an eigenvalue. The question decides which phrasing earns the mark.',
+        '<b>Rotation \\(\\det = +1\\), reflection \\(\\det = -1\\); a reflection always squares to \\(I\\).</b>'
+      ])
+    ]
+  },
+
+  {
+    id: 'l5', q: 'Q1/Q4', title: 'Proof templates you can memorise',
+    blurb: 'Show a map is linear · composite / inverse linear · ker f and im f are subspaces. These barely change year to year — learn them verbatim.',
+    build: () => [
+      block('30-second intuition', [
+        p('These proofs are <b>fill-in-the-blank</b>. The marker is checking that you know the two linearity conditions and the subspace conditions, and that you apply them in order. Memorise the skeleton; only the map changes.')
+      ]),
+      block('Template A — "show f is linear"', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px"><b>Claim.</b> \\(f\\) is linear, i.e. for all \\(\\mathbf u,\\mathbf v\\) and all scalars \\(k\\): \\(f(\\mathbf u + \\mathbf v) = f(\\mathbf u) + f(\\mathbf v)\\) and \\(f(k\\mathbf u) = k\\,f(\\mathbf u)\\).</p>
+          <p style="margin:0 0 6px"><b>Additivity.</b> Take general \\(\\mathbf u,\\mathbf v\\). Compute \\(f(\\mathbf u+\\mathbf v)\\) from the definition, expand, regroup into \\(f(\\mathbf u) + f(\\mathbf v)\\).</p>
+          <p style="margin:0 0 6px"><b>Homogeneity.</b> Take general \\(\\mathbf u\\), scalar \\(k\\). Compute \\(f(k\\mathbf u)\\), pull the \\(k\\) out, get \\(k\\,f(\\mathbf u)\\).</p>
+          <p style="margin:0"><b>Conclude.</b> Both hold, so \\(f\\) is linear. \u25a0</p>` })
+      ]),
+      block('Template B — composite & inverse of linear maps', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 8px"><b>\\(g\\circ f\\) is linear:</b> \\((g\\circ f)(\\mathbf u + \\mathbf v) = g(f(\\mathbf u+\\mathbf v)) = g(f(\\mathbf u) + f(\\mathbf v)) = g(f(\\mathbf u)) + g(f(\\mathbf v)) = (g\\circ f)(\\mathbf u) + (g\\circ f)(\\mathbf v)\\), using \\(f\\) linear then \\(g\\) linear. Same chain for \\(k\\mathbf u\\).</p>
+          <p style="margin:0"><b>\\(h^{-1}\\) is linear</b> (\\(h\\) invertible linear): put \\(\\mathbf u' = h^{-1}(\\mathbf u),\\ \\mathbf v' = h^{-1}(\\mathbf v)\\), so \\(\\mathbf u = h(\\mathbf u'),\\ \\mathbf v = h(\\mathbf v')\\). Then \\(h^{-1}(\\mathbf u + \\mathbf v) = h^{-1}(h(\\mathbf u') + h(\\mathbf v')) = h^{-1}(h(\\mathbf u' + \\mathbf v')) = \\mathbf u' + \\mathbf v' = h^{-1}(\\mathbf u) + h^{-1}(\\mathbf v)\\). Same for scalars.</p>` })
+      ]),
+      block('Template C — ker f and im f are subspaces', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px">For each, check: <b>(i)</b> contains \\(\\mathbf 0\\); <b>(ii)</b> closed under addition; <b>(iii)</b> closed under scalar multiplication. (The paper's formula sheet lists these as V0, V3, V4, S0.)</p>
+          <p style="margin:0 0 6px"><b>\\(\\ker f\\):</b> \\(f(\\mathbf 0) = \\mathbf 0\\) so \\(\\mathbf 0 \\in \\ker f\\). If \\(f(\\mathbf u) = f(\\mathbf v) = \\mathbf 0\\) then \\(f(\\mathbf u + \\mathbf v) = \\mathbf 0 + \\mathbf 0 = \\mathbf 0\\). If \\(f(\\mathbf v) = \\mathbf 0\\) then \\(f(k\\mathbf v) = k\\mathbf 0 = \\mathbf 0\\). So \\(\\ker f\\) is a subspace.</p>
+          <p style="margin:0"><b>\\(\\operatorname{im} f\\):</b> \\(\\mathbf 0 = f(\\mathbf 0) \\in \\operatorname{im} f\\). If \\(\\mathbf w_1 = f(\\mathbf v_1),\\ \\mathbf w_2 = f(\\mathbf v_2)\\) then \\(\\mathbf w_1 + \\mathbf w_2 = f(\\mathbf v_1 + \\mathbf v_2) \\in \\operatorname{im} f\\). And \\(k\\mathbf w_1 = f(k\\mathbf v_1) \\in \\operatorname{im} f\\). So \\(\\operatorname{im} f\\) is a subspace.</p>` })
+      ]),
+      block('Template D — "an m×n matrix A gives a linear map"', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px">Define \\(f : \\mathbb R^n \\to \\mathbb R^m\\) by \\(f(\\mathbf v) = A\\mathbf v\\). Then, by the distributive and scalar rules for matrix multiplication:</p>
+          <p style="margin:0 0 6px">\\(f(\\mathbf u + \\mathbf v) = A(\\mathbf u + \\mathbf v) = A\\mathbf u + A\\mathbf v = f(\\mathbf u) + f(\\mathbf v)\\),</p>
+          <p style="margin:0">\\(f(k\\mathbf v) = A(k\\mathbf v) = kA\\mathbf v = k\\,f(\\mathbf v)\\). Both hold, so \\(f\\) is linear, with domain \\(\\mathbb R^n\\) and codomain \\(\\mathbb R^m\\). ■</p>` })
+      ]),
+      block('Quick self-check', [
+        practice({
+          q: 'In the additivity step of \u201cshow \\(f\\) is linear\u201d, which identity are you trying to reach? Type the letter: (a) \\(f(\\mathbf u+\\mathbf v)=f(\\mathbf u)+f(\\mathbf v)\\)  (b) \\(f(\\mathbf u\\mathbf v)=f(\\mathbf u)f(\\mathbf v)\\)  (c) \\(f(\\mathbf u)+\\mathbf v = f(\\mathbf u+\\mathbf v)\\).',
+          fields: [{ label: 'letter' }],
+          answers: ['a'],
+          steps: ['Linearity = additivity \\(f(\\mathbf u+\\mathbf v)=f(\\mathbf u)+f(\\mathbf v)\\) plus homogeneity \\(f(k\\mathbf u)=kf(\\mathbf u)\\). There is no product of vectors involved.']
+        })
+      ]),
+      techBlock([
+        '<b>Say "for all" and take general elements.</b> Checking one example scores nothing.',
+        '<b>Name the property as you use it:</b> "since \\(f\\) is linear\u2026", "by closure of \\(V\\)\u2026". The marker is ticking off named steps.',
+        '<b>Always start a subspace proof with the zero vector</b> — it is one free mark and also rules out empty sets.',
+        '<b>Injective \\(\\iff \\ker h = \\{\\mathbf 0\\}\\):</b> forward — if \\(h\\) injective and \\(h(\\mathbf v)=\\mathbf 0=h(\\mathbf 0)\\) then \\(\\mathbf v=\\mathbf 0\\). Backward — if \\(h(\\mathbf w_1)=h(\\mathbf w_2)\\) then \\(h(\\mathbf w_1-\\mathbf w_2)=\\mathbf 0\\) so \\(\\mathbf w_1-\\mathbf w_2\\in\\ker h=\\{\\mathbf 0\\}\\).'
+      ])
+    ]
+  },
+
+  {
+    id: 'l6', q: 'Q1/Q4', title: 'Bases, dimension & linear independence',
+    blurb: '"Show S is a basis" the way the model solution does it, plus change-of-basis matrices and dimension of solution spaces.',
+    build: () => [
+      block('30-second intuition', [
+        p('A <b>basis</b> is a set that is both a spanning set and linearly independent. For \\(n\\) vectors in \\(\\mathbb R^n\\), the fastest route is one determinant: if \\(\\det \\ne 0\\), the columns are independent and automatically span — done.'),
+        p('The exam sometimes wants the long way (the 2024 model solution): show spanning by solving \\(a\\mathbf v_1 + b\\mathbf v_2 + c\\mathbf v_3 = (x,y,z)\\) for arbitrary \\((x,y,z)\\); then note the same system with \\((0,0,0)\\) forces \\(a=b=c=0\\).')
+      ]),
+      block('Template — "show S = {v₁, v₂, v₃} is a basis for ℝ³"', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px"><b>Fast version.</b> Form \\(Q\\) with the \\(\\mathbf v_i\\) as columns. Compute \\(\\det Q\\). If \\(\\det Q \\ne 0\\), the vectors are linearly independent; three independent vectors in \\(\\mathbb R^3\\) span \\(\\mathbb R^3\\); hence a basis.</p>
+          <p style="margin:0 0 6px"><b>Long version (matches the mark scheme).</b> <em>Spanning:</em> set \\(a\\mathbf v_1 + b\\mathbf v_2 + c\\mathbf v_3 = (x,y,z)\\), solve the \\(3\\times3\\) system; a solution exists for every \\((x,y,z)\\), so \\(S\\) spans. <em>Independence:</em> the same system with right-hand side \\((0,0,0)\\) has the unique solution \\(a=b=c=0\\). Both \u2192 basis.</p>
+          <p style="margin:0"><b>Change of basis.</b> \\(Q = [\\mathbf v_1\\ \\mathbf v_2\\ \\mathbf v_3]\\) converts \\(S\\)-coordinates \u2192 standard; \\(P = Q^{-1}\\) converts standard \u2192 \\(S\\).</p>` })
+      ]),
+      block('Worked example — matrix relative to a new basis, with numbers', [
+        p('This exact shape (find \\(Q\\), \\(Q^{-1}\\), then \\(B = Q^{-1}AQ\\)) is in the 2017, 2020, 2021 and 2022 papers. Step through it.'),
+        stepper([
+          { op: 'the setup', text: '\\(f(x,y) = (3x,\\ x + 2y)\\), so \\(A = \\begin{bmatrix}3&0\\\\1&2\\end{bmatrix}\\) in the standard basis. New basis \\(S = \\{(2,1),\\,(1,1)\\}\\).' },
+          { op: 'Q (S → standard)', text: 'Put the \\(S\\)-vectors in as columns: \\(Q = \\begin{bmatrix}2&1\\\\1&1\\end{bmatrix}\\). \\(\\det Q = 2(1) - 1(1) = 1 \\ne 0\\), so \\(S\\) is a basis.' },
+          { op: 'Q⁻¹ (standard → S)', text: '\\(Q^{-1} = \\dfrac{1}{\\det Q}\\begin{bmatrix}1&-1\\\\-1&2\\end{bmatrix} = \\begin{bmatrix}1&-1\\\\-1&2\\end{bmatrix}\\) (2×2 inverse: swap the diagonal, negate the off-diagonal, divide by det).' },
+          { op: 'AQ', text: '\\(AQ = \\begin{bmatrix}3&0\\\\1&2\\end{bmatrix}\\begin{bmatrix}2&1\\\\1&1\\end{bmatrix} = \\begin{bmatrix}6&3\\\\4&3\\end{bmatrix}\\).' },
+          { op: 'B = Q⁻¹AQ', text: '\\(B = \\begin{bmatrix}1&-1\\\\-1&2\\end{bmatrix}\\begin{bmatrix}6&3\\\\4&3\\end{bmatrix} = \\begin{bmatrix}2&0\\\\2&3\\end{bmatrix}\\). This represents \\(f\\) in the basis \\(S\\).' },
+          { op: 'sanity check', text: 'Similarity preserves determinant and trace: \\(\\det A = 6 = \\det B\\), \\(\\operatorname{tr} A = 5 = \\operatorname{tr} B\\). If these don’t match, you have an arithmetic slip.' }
+        ], { render: () => el('div') })
+      ]),
+      block('Dimension of a solution space', [
+        p('Q4 often gives a differential-equation solution set, e.g. \\(U = \\{(A + Bx)e^{-2x} : A, B \\in \\mathbb R\\}\\). A basis is \\(\\{e^{-2x},\\ x e^{-2x}\\}\\) (the two independent shapes), so \\(\\dim U = 2\\). Then a map like \\(d/dx\\) on \\(U\\) gets a \\(2\\times2\\) matrix by differentiating each basis function and writing the result in that basis.'),
+        el('div', { class: 'stage', html: `<p style="margin:0">\\(d(e^{-2x}) = -2e^{-2x}\\), \\(d(xe^{-2x}) = e^{-2x} - 2xe^{-2x}\\). Matrix \\(\\begin{bmatrix}-2 & 1\\\\ 0 & -2\\end{bmatrix}\\). Its kernel is \\(\\{\\mathbf 0\\}\\), so \\(d\\) is injective on \\(U\\).</p>` })
+      ]),
+      block('Is it a subspace? — worked yes and no', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 8px"><b>\\(U = \\{(r, 2r, r+s) : r,s \\in \\mathbb R\\}\\) — yes.</b> \\(\\mathbf 0\\) is here (\\(r=s=0\\)). Sum: \\((r,2r,r{+}s) + (r',2r',r'{+}s') = (r{+}r',\\,2(r{+}r'),\\,(r{+}r'){+}(s{+}s'))\\), same form. Scalar: \\(k(r,2r,r{+}s) = (kr,2kr,kr{+}ks)\\), same form. All three hold.</p>
+          <p style="margin:0"><b>\\(W = \\{(r, r^2, 1) : r \\in \\mathbb R\\}\\) — no.</b> \\(\\mathbf 0 \\notin W\\) (third entry is always 1). Also not closed: \\((1,1,1)+(2,4,1) = (3,5,2) \\notin W\\). Quoting <em>one</em> failure is enough.</p>` })
+      ]),
+      block('Polynomial and matrix spaces (2019 / 2022 papers)', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px">Inside \\(P_2(\\mathbb R) = \\{ax^2 + bx + c\\}\\):</p>
+          <ul style="margin:0 0 8px"><li>\\(P_1(\\mathbb R) = \\{bx + c\\}\\): <b>subspace</b> (it is “\\(a = 0\\)”, closed, contains \\(0\\)).</li>
+          <li>\\(\\{ax^2 - 1 : a \\in \\mathbb R\\}\\): <b>not</b> — no zero polynomial, and \\((x^2-1)+(x^2-1) = 2x^2 - 2\\) is not of the form.</li>
+          <li>\\(P_2(\\mathbb Z)\\) (integer coefficients): <b>not</b> — not closed under scalar multiplication by \\(\\tfrac12\\).</li></ul>
+          <p style="margin:0">Inside \\(M_n(\\mathbb R)\\): symmetric matrices and skew-symmetric matrices are subspaces; <b>singular</b> matrices are not (sum of two singular matrices can be invertible), and <b>invertible</b> matrices are not (no zero matrix).</p>` })
+      ]),
+      block('Your turn', [
+        practice({
+          q: 'Is \\(\\{(1,2),\\,(2,4)\\}\\) a basis for \\(\\mathbb R^2\\)? Type yes or no, and give \\(\\det[\\,\\mathbf v_1\\ \\mathbf v_2\\,]\\).',
+          fields: [{ label: 'basis?' }, { label: 'det' }],
+          answers: ['no', 0],
+          steps: [
+            '\\(\\det\\begin{bmatrix}1&2\\\\2&4\\end{bmatrix} = 1\\cdot4 - 2\\cdot2 = 0\\).',
+            'Determinant 0 \u2192 the vectors are linearly dependent (\\((2,4) = 2(1,2)\\)) \u2192 not a basis.'
+          ]
+        })
+      ]),
+      techBlock([
+        '<b>State both requirements</b> — spanning and independence — even in the fast determinant version. "\\(\\det \\ne 0\\), hence independent, hence (three in \\(\\mathbb R^3\\)) spanning, hence a basis."',
+        '<b>For a "show it is a basis" worth 4\u20135 marks, the determinant argument is usually enough.</b> Only grind through the full linear-system version if the question explicitly asks you to exhibit the spanning coefficients.',
+        '<b>Change-of-basis direction:</b> label your matrices. Mixing up \\(Q\\) and \\(Q^{-1}\\) loses the follow-on marks in "find the matrix relative to \\(S\\)".',
+        '<b>Function spaces:</b> the dimension is the number of free constants. Basis = the functions multiplying those constants.'
+      ])
+    ]
+  },
+
+  {
+    id: 'l7', q: 'Q5', title: 'Symmetric & orthogonal matrices',
+    blurb: 'Real eigenvalues, orthogonal eigenvectors, and MᵀM = I from orthonormal columns — short proofs that recur in Q5.',
+    build: () => [
+      block('30-second intuition', [
+        p('<b>Symmetric</b> (\\(A = A^{T}\\)): always has real eigenvalues, and eigenvectors for different eigenvalues are orthogonal. This is <em>why</em> quadratic forms can always be rotated to a clean diagonal form.'),
+        p('<b>Orthogonal</b> (\\(M^{T}M = I\\)): columns are an orthonormal set. Then \\(M^{-1} = M^{T}\\), \\(\\det M = \\pm1\\), and \\(M\\) preserves all lengths and angles (a rotation or reflection).')
+      ]),
+      block('Proof — distinct eigenvalues of a symmetric matrix give orthogonal eigenvectors', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px">Let \\(A\\mathbf v_1 = k_1\\mathbf v_1\\), \\(A\\mathbf v_2 = k_2\\mathbf v_2\\), \\(k_1 \\ne k_2\\).</p>
+          <p style="margin:0 0 6px">Transpose the first and right-multiply by \\(\\mathbf v_2\\): \\(\\mathbf v_1^{T}A^{T}\\mathbf v_2 = k_1\\mathbf v_1^{T}\\mathbf v_2\\).</p>
+          <p style="margin:0 0 6px">Left-multiply the second by \\(\\mathbf v_1^{T}\\): \\(\\mathbf v_1^{T}A\\mathbf v_2 = k_2\\mathbf v_1^{T}\\mathbf v_2\\).</p>
+          <p style="margin:0 0 6px">Since \\(A = A^{T}\\), the left sides are equal. Subtract: \\((k_1 - k_2)\\,\\mathbf v_1^{T}\\mathbf v_2 = 0\\).</p>
+          <p style="margin:0">\\(k_1 \\ne k_2 \\Rightarrow \\mathbf v_1^{T}\\mathbf v_2 = \\mathbf v_1 \\cdot \\mathbf v_2 = 0\\). Orthogonal. \u25a0</p>` })
+      ]),
+      block('Proof — orthonormal columns ⟹ MᵀM = I', [
+        el('div', { class: 'stage', html: `
+          <p style="margin:0 0 6px">Entry \\((i,j)\\) of \\(M^{T}M\\) is (column \\(i\\) of \\(M\\)) \\(\\cdot\\) (column \\(j\\) of \\(M\\)).</p>
+          <p style="margin:0 0 6px">Columns are unit length \u2192 diagonal entries \\(= 1\\). Columns are mutually orthogonal \u2192 off-diagonal entries \\(= 0\\).</p>
+          <p style="margin:0">So \\(M^{T}M = I\\); \\(M\\) is orthogonal. \u25a0</p>` })
+      ]),
+      block('Your turn', [
+        practice({
+          q: 'Fill the blanks (one word each). A real symmetric matrix always has ______ eigenvalues. Its eigenvectors for distinct eigenvalues are always ______.',
+          fields: [{ label: 'blank 1' }, { label: 'blank 2' }],
+          answers: ['real', 'orthogonal'],
+          steps: [
+            'Real symmetric \u2192 real eigenvalues (no complex roots of \\(\\chi_A\\)).',
+            'Distinct eigenvalues \u2192 orthogonal eigenvectors (proof above). This is what lets you build the orthogonal \\(\\hat P\\).'
+          ]
+        })
+      ]),
+      techBlock([
+        '<b>The transpose trick</b> (\\(\\mathbf v_1^{T}A\\mathbf v_2\\) two ways) is the whole proof — practise writing it cold.',
+        '<b>\\(M^{T}M = I\\) means "columns orthonormal"; \\(MM^{T} = I\\) means "rows orthonormal".</b> For square \\(M\\) they are equivalent, but quote the one the question sets up.',
+        '<b>Repeated eigenvalue:</b> you may need Gram\u2013Schmidt within that eigenspace to get an orthonormal set. Distinct eigenvalues never need it.',
+        '<b>\\(\\det(\\text{orthogonal}) = \\pm1\\):</b> \\(+1\\) rotation, \\(-1\\) reflection — ties straight back to the orientation language in Q1.'
+      ])
+    ]
+  }
+];
+
+/* ---------- block builders ---------- */
+function p(html) { return el('p', { html }); }
+function block(title, kids) {
+  const s = el('section', { class: 'block' }, el('h3', {}, title));
+  const prose = el('div', { class: 'prose' });
+  kids.forEach(k => prose.append(k));
+  s.append(prose);
+  return s;
+}
+function techBlock(items) {
+  return el('section', { class: 'block' },
+    el('h3', {}, 'What the marker rewards'),
+    el('div', { class: 'callout tech' },
+      el('h4', {}, 'Exam technique'),
+      el('ul', { html: items.map(i => `<li>${i}</li>`).join('') })));
+}
+
+/* ============================ MOCK EXAM ============================ */
+const MOCK = {
+  minutes: 75,
+  questions: [
+    {
+      title: 'Question 2 — Row reduction & the fundamental spaces',
+      src: 'EC133 2024, Q2(a) — 16 marks of 25',
+      parts: `
+        <p>System: \\(w - 2x - 2y - 3z = 1\\), \\(\\ 2w + 3x - 2y + 2z = -9\\), \\(\\ 3w - 5x - 2y + 3z = -8\\).</p>
+        <p>(i) Write the coefficient matrix \\(A\\) and augmented matrix \\(A'\\). <span class="marks">[2]</span></p>
+        <p>(ii) Row-reduce \\(A'\\) to RREF. <span class="marks">[4]</span></p>
+        <p>(iii) State the solution set. <span class="marks">[2]</span></p>
+        <p>(iv) Bases for the row space, column space and kernel of \\(A\\). <span class="marks">[6]</span></p>
+        <p>(v) Verify the Dimension Theorem. <span class="marks">[2]</span></p>`,
+      sol: [
+        '\\(A = \\begin{bmatrix}1&-2&-2&-3\\\\2&3&-2&2\\\\3&-5&-2&3\\end{bmatrix}\\), \\(A\'\\) is \\(A\\) with the column \\((1,-9,-8)^{T}\\) appended.',
+        'RREF of \\(A\'\\): \\(\\begin{bmatrix}1&0&0&45/13 & -75/13\\\\0&1&0&4/13 & -11/13\\\\0&0&1&38/13 & -33/13\\end{bmatrix}\\) (e.g. \\(R_2-2R_1,\\ R_3-3R_1,\\ R_2\\leftrightarrow R_3,\\ R_3-7R_2,\\ -\\tfrac1{26}R_3\\), then back-substitute).',
+        'One free variable \\(z\\): \\(w = -\\tfrac1{13}(45z + 75),\\ x = -\\tfrac1{13}(4z + 11),\\ y = -\\tfrac1{13}(38z + 33)\\).',
+        'Row space: the three non-zero RREF rows (or \\((13,0,0,45),(0,13,0,4),(0,0,13,38)\\)). Column space: columns 1,2,3 of the original \\(A\\): \\((1,2,3),(-2,3,-5),(-2,-2,-2)\\). Kernel: drop the constants \u2192 \\((w,x,y) = (-45,-4,-38)\\tfrac{z}{13}\\); take \\(z=-13\\) \u2192 basis \\((45,4,38,-13)\\).',
+        '\\(n = 4\\) columns, \\(\\operatorname{rank}(A) = 3\\), \\(\\operatorname{nullity}(A) = 1\\). \\(3 + 1 = 4 = n\\). \u2713'
+      ]
+    },
+    {
+      title: 'Question 3 — Difference equation via diagonalisation',
+      src: 'EC133 2022, Q3(a) — 15 marks of 25',
+      parts: `
+        <p>\\(x_n = 3x_{n-1} - 2x_{n-2}\\), \\(x_0 = 2\\), \\(x_1 = 3\\).</p>
+        <p>(i) Convert to a first-order system; write its coefficient matrix \\(A\\). <span class="marks">[3]</span></p>
+        <p>(ii) Eigenvalues and eigenvectors of \\(A\\). <span class="marks">[4]</span></p>
+        <p>(iii) Diagonalise \\(A\\) and find a closed form for \\(x_n\\). <span class="marks">[6]</span></p>
+        <p>(iv) What happens to \\(x_n / x_{n-1}\\) as \\(n \\to \\infty\\)? <span class="marks">[2]</span></p>`,
+      sol: [
+        'Let \\(y_n = x_{n-1}\\): \\(\\begin{bmatrix}x_n\\\\y_n\\end{bmatrix} = \\begin{bmatrix}3&-2\\\\1&0\\end{bmatrix}\\begin{bmatrix}x_{n-1}\\\\y_{n-1}\\end{bmatrix}\\).',
+        '\\(\\chi_A(k) = k^2 - 3k + 2 = (k-1)(k-2)\\) \u2192 \\(\\lambda = 1, 2\\). Eigenvectors \\(\\mathbf v_1 = (1,1)\\), \\(\\mathbf v_2 = (2,1)\\).',
+        '\\(Q = \\begin{bmatrix}1&2\\\\1&1\\end{bmatrix},\\ D = \\begin{bmatrix}1&0\\\\0&2\\end{bmatrix},\\ Q^{-1} = \\begin{bmatrix}-1&2\\\\1&-1\\end{bmatrix}\\). Then \\(x_n = \\alpha(1)^n + \\beta(2)^n\\); \\(\\alpha + \\beta = 2,\\ \\alpha + 2\\beta = 3 \\Rightarrow \\alpha = \\beta = 1\\). So \\(x_n = 1 + 2^n\\) (check \\(x_2 = 5\\)).',
+        '\\(x_n / x_{n-1} \\to 2\\), the dominant eigenvalue; the state vector aligns with \\((2,1)\\).'
+      ]
+    },
+    {
+      title: 'Question 5 — Quadratic form, orthogonal diagonalisation, definiteness',
+      src: 'EC133 2024, Q5(a) — 11 marks of 25',
+      parts: `
+        <p>\\(Q(x,y) = x^2 + 2axy + y^2\\), \\(a \\ne 0\\) constant.</p>
+        <p>(i) Symmetric matrix \\(A\\) with \\(Q = \\mathbf v^{T}A\\mathbf v\\). <span class="marks">[1]</span></p>
+        <p>(ii) Orthogonal \\(\\hat P\\) and diagonal \\(D\\) with \\(A = \\hat P D \\hat P^{T}\\). <span class="marks">[4]</span></p>
+        <p>(iii) Values of \\(a\\) for which \\(Q\\) is positive definite (eigenvalue test <em>and</em> Sylvester). <span class="marks">[2]</span></p>
+        <p>(iv) Diagonal form in \\(X, Y\\), with \\(X, Y\\) in terms of \\(x, y\\). <span class="marks">[2]</span></p>`,
+      sol: [
+        '\\(A = \\begin{bmatrix}1 & a\\\\ a & 1\\end{bmatrix}\\).',
+        '\\(\\chi_A(k) = k^2 - 2k + (1 - a^2)\\) \u2192 \\(k = 1 + a,\\ 1 - a\\). Eigenvectors \\((1,1)\\) and \\((1,-1)\\); normalise by \\(1/\\sqrt2\\). \\(\\hat P = \\tfrac{1}{\\sqrt2}\\begin{bmatrix}1&1\\\\1&-1\\end{bmatrix} = \\hat P^{T}\\), \\(D = \\begin{bmatrix}1+a & 0\\\\ 0 & 1-a\\end{bmatrix}\\).',
+        'Eigenvalue test: need \\(1 + a > 0\\) and \\(1 - a > 0\\) \u2192 \\(-1 < a < 1\\). Sylvester: \\(D_1 = 1 > 0\\), \\(D_2 = \\det A = 1 - a^2 > 0\\) \u2192 same, \\(-1 < a < 1\\).',
+        '\\(\\mathbf V = \\hat P^{T}\\mathbf v\\): \\(X = \\tfrac{x+y}{\\sqrt2},\\ Y = \\tfrac{x-y}{\\sqrt2}\\). Then \\(Q = (1+a)X^2 + (1-a)Y^2\\).'
+      ]
+    }
+  ]
+};
+
+function renderMock() {
+  const v = document.getElementById('view');
+  v.replaceChildren();
+  const wrap = el('div', { class: 'wrap wide' });
+  wrap.append(el('div', { class: 'lesson-head' },
+    el('span', { class: 'eyebrow' }, 'Final round'),
+    el('h2', {}, 'Mock exam \u2014 three real questions')));
+  wrap.append(el('p', { class: 'prose', html: 'Do these on paper, closed-book, in <b>75 minutes</b> (the real paper is 2 hours for 3 full questions \u2014 this is proportional). These are lifted directly from the 2022 and 2024 papers. Reveal the model solution only after you stop the clock.' }));
+
+  let remaining = MOCK.minutes * 60, timer = null;
+  const clock = el('span', { class: 'clock' }, fmtClock(remaining));
+  const startBtn = el('button', { class: 'go' }, 'Start 75:00');
+  const resetBtn = el('button', {}, 'Reset');
+  function tick() {
+    remaining--; clock.textContent = fmtClock(remaining);
+    clock.classList.toggle('low', remaining < 300);
+    if (remaining <= 0) { clearInterval(timer); timer = null; clock.textContent = "TIME"; startBtn.textContent = 'Start 75:00'; }
+  }
+  startBtn.onclick = () => {
+    if (timer) { clearInterval(timer); timer = null; startBtn.textContent = 'Resume'; }
+    else { timer = setInterval(tick, 1000); startBtn.textContent = 'Pause'; }
+  };
+  resetBtn.onclick = () => { clearInterval(timer); timer = null; remaining = MOCK.minutes * 60; clock.textContent = fmtClock(remaining); clock.classList.remove('low'); startBtn.textContent = 'Start 75:00'; };
+  wrap.append(el('div', { class: 'timer-bar' }, clock, el('span', { class: 'spacer', style: 'flex:1' }), startBtn, resetBtn));
+
+  MOCK.questions.forEach(q => {
+    const card = el('div', { class: 'exam-q' });
+    card.append(el('h3', {}, q.title), el('div', { class: 'src' }, q.src), el('div', { class: 'parts', html: q.parts }));
+    const sol = el('div', { class: 'sol' }, el('h4', {}, 'Model solution'),
+      el('ol', { html: q.sol.map(s => `<li>${s}</li>`).join('') }));
+    const t = el('button', { class: 'toggle-sol' }, 'Reveal model solution');
+    t.onclick = () => { sol.classList.toggle('show'); t.textContent = sol.classList.contains('show') ? 'Hide model solution' : 'Reveal model solution'; typeset(); };
+    card.append(t, sol);
+    wrap.append(card);
+  });
+
+  wrap.append(el('div', { class: 'lesson-nav' },
+    el('button', { onclick: () => go('home') }, '\u2039 Back to menu'),
+    el('button', { class: 'primary', onclick: () => { store.mark('mock'); go('home'); } }, 'Mark done \u2713')));
+  v.append(wrap);
+  typeset();
+}
+const fmtClock = s => `${String(Math.floor(Math.max(s, 0) / 60)).padStart(2, '0')}:${String(Math.max(s, 0) % 60).padStart(2, '0')}`;
+
+/* ============================ CHEAT SHEET ============================ */
+function renderCheat() {
+  const v = document.getElementById('view');
+  v.replaceChildren();
+  const wrap = el('div', { class: 'wrap wide' });
+  wrap.append(el('div', { class: 'lesson-head' },
+    el('span', { class: 'eyebrow' }, 'One-screen recap'),
+    el('h2', {}, 'Cheat sheet')));
+  wrap.append(el('p', { class: 'prose', html: 'Every procedure in the order the paper asks for it. Open this on your phone on the walk in.' }));
+
+  const cards = [
+    ['Q1 · Linear maps & matrices', `
+      <ol>
+        <li>Matrix of \\(f\\): column \\(j\\) is \\(f(\\mathbf e_j)\\) — the coefficients of each output slot go <b>down a column</b>.</li>
+        <li>Composite \\(q\\circ p\\) (do \\(p\\) first) has matrix \\(BA\\).</li>
+        <li>Change of basis: \\(Q=[\\mathbf v_1\\,\\mathbf v_2\\,\\mathbf v_3]\\) (new basis as columns) converts new→standard; \\(Q^{-1}\\) converts standard→new; matrix in new basis \\(= Q^{-1}AQ\\).</li>
+        <li>\\(\\det A\\): \\(|\\det A|\\) = area/volume scale; \\(\\det A<0\\) reverses orientation; \\(\\det A=0\\) ⇔ columns dependent ⇔ singular.</li>
+        <li>An \\(m\\times n\\) matrix always gives a linear map (\\(A(\\mathbf u+\\mathbf v)=A\\mathbf u+A\\mathbf v\\), \\(A(k\\mathbf u)=kA\\mathbf u\\)).</li>
+      </ol>`],
+    ['Q2 · Row reduction & spaces', `
+      <ol>
+        <li>Augment \\([A\\,|\\,\\mathbf b]\\); reduce with swap / scale / add-multiple. <b>Write every op.</b></li>
+        <li>rank = #pivots. nullity = #non-pivot columns. Dimension Theorem: \\(\\operatorname{rank}+\\operatorname{nullity}=\\) #columns.</li>
+        <li>Row space basis = non-zero RREF rows. Column space basis = pivot columns <b>of the original \\(A\\)</b>.</li>
+        <li>Kernel: solve \\(A\\mathbf x=\\mathbf 0\\); set each free variable to 1 in turn.</li>
+        <li>Consistency: \\(\\operatorname{rank}A=\\operatorname{rank}[A|\\mathbf b]=n\\) → unique; \\(=\\operatorname{rank}<n\\) → ∞ many; \\(\\operatorname{rank}A<\\operatorname{rank}[A|\\mathbf b]\\) → none.</li>
+        <li>Row op on det: swap → \\(\\times(-1)\\); scale by \\(k\\) → \\(\\times k\\); add multiple → unchanged. (Because \\(\\det(EM)=\\det E\\,\\det M\\).)</li>
+      </ol>`],
+    ['Q3 · Eigenvalues & difference equations', `
+      <ol>
+        <li>\\(k\\)-th order recurrence → first-order system: \\(y_n=x_{n-1}\\), etc. Coefficient (companion) matrix \\(A\\).</li>
+        <li>\\(\\chi_A(k)=\\det(A-kI)=0\\) → eigenvalues. (2×2: \\(k^2-(\\operatorname{tr}A)k+\\det A\\).)</li>
+        <li>Eigenvector: solve \\((A-kI)\\mathbf v=\\mathbf 0\\) for each \\(k\\).</li>
+        <li>\\(Q\\) = eigenvectors as columns, \\(D\\) = eigenvalues in the same order; \\(A=QDQ^{-1}\\), \\(A^n=QD^nQ^{-1}\\).</li>
+        <li>Closed form: \\(x_n=\\alpha\\lambda_1^n+\\beta\\lambda_2^n\\); fit \\(\\alpha,\\beta\\) from \\(x_0,x_1\\).</li>
+        <li>\\(x_n/x_{n-1}\\to\\) dominant (largest \\(|\\lambda|\\)); ratios → dominant eigenvector. Transition matrix ⇒ \\(\\lambda=1\\), long-run proportions = its eigenvector.</li>
+      </ol>`],
+    ['Q4 · Vector spaces & subspaces', `
+      <ol>
+        <li>Subspace test: (i) contains \\(\\mathbf 0\\); (ii) closed under \\(+\\); (iii) closed under scalar \\(\\times\\). One fails ⇒ not a subspace (e.g. \\(\\{(r,r^2,1)\\}\\): no \\(\\mathbf 0\\), not closed).</li>
+        <li>\\(\\ker f\\), \\(\\operatorname{im} f\\) are always subspaces (memorised proof — Lesson 6).</li>
+        <li>Dimension of a solution space = number of free constants; basis = the functions they multiply.</li>
+        <li>Matrix of a map on a function/polynomial space: apply the map to each basis element, write the result in that basis (columns).</li>
+        <li>\\(h\\) injective ⇔ \\(\\ker h=\\{\\mathbf 0\\}\\).</li>
+      </ol>`],
+    ['Q5 · Quadratic forms', `
+      <ol>
+        <li>\\(A\\) symmetric: diagonal = square coefficients; off-diagonal = <b>half</b> each cross coefficient.</li>
+        <li>\\(\\chi_A\\) → eigenvalues → eigenvectors (auto-orthogonal for distinct \\(\\lambda\\), since \\(A=A^T\\)).</li>
+        <li>Normalise eigenvectors → columns of \\(\\hat P\\); \\(A=\\hat P D\\hat P^{T}\\), \\(\\hat P^{T}=\\hat P^{-1}\\).</li>
+        <li>New variables \\(\\mathbf V=\\hat P^{T}\\mathbf v\\); diagonal form \\(Q=\\lambda_1X^2+\\lambda_2Y^2+\\cdots\\).</li>
+        <li>Definiteness — <b>eigenvalue test:</b> all \\(+\\) pos. def.; all \\(-\\) neg. def.; mixed indefinite; some \\(0\\) semidefinite. <b>Sylvester:</b> \\(D_1,\\dots,D_n>0\\) pos. def.; signs \\(-,+,-,\\dots\\) neg. def.</li>
+      </ol>`],
+    ['Formula-sheet essentials', `
+      <ul>
+        <li>\\(\\det(AB)=\\det A\\det B\\); \\(\\det(A^{T})=\\det A\\); \\(\\det(A^{-1})=1/\\det A\\); \\(\\det(kA)=k^{n}\\det A\\).</li>
+        <li>\\(\\operatorname{tr}(AB)=\\operatorname{tr}(BA)\\); \\(\\operatorname{tr}\\) is similarity-invariant; \\(\\operatorname{tr}A=\\sum\\lambda_i\\), \\(\\det A=\\prod\\lambda_i\\).</li>
+        <li>\\((AB)^{T}=B^{T}A^{T}\\); \\((AB)^{-1}=B^{-1}A^{-1}\\).</li>
+        <li>2×2 inverse: \\(\\begin{bmatrix}a&b\\\\c&d\\end{bmatrix}^{-1}=\\dfrac{1}{ad-bc}\\begin{bmatrix}d&-b\\\\-c&a\\end{bmatrix}\\).</li>
+        <li>Rotation by \\(\\theta\\): \\(\\begin{bmatrix}\\cos\\theta&-\\sin\\theta\\\\\\sin\\theta&\\cos\\theta\\end{bmatrix}\\), \\(\\det=1\\). Reflection: \\(\\det=-1\\), squares to \\(I\\).</li>
+        <li>Subspace axioms to quote: V0 (closed \\(+\\)), V3 (\\(\\mathbf 0\\)), V4 (negatives), S0 (closed scalar \\(\\times\\)).</li>
+      </ul>`],
+    ['Exam-day plan', `
+      <ul>
+        <li>Read all 5, then commit to <b>Q2, Q3</b> and whichever of Q1 / Q5 looks friendliest.</li>
+        <li>Spend the first 3&ndash;4 min writing the coefficient/aug matrix and the method headings — those are setup marks.</li>
+        <li>Every calculation gets its working: "solutions without accompanying working might not receive full marks" is printed on the paper.</li>
+        <li>If a proof stalls, still write the definitions and the "for all \\(\\mathbf u,\\mathbf v\\), \\(k\\)" opening — partial marks.</li>
+        <li>40 min per question. Bank the easy parts of all three before polishing any one.</li>
+      </ul>`]
+  ];
+
+  const grid = el('div', { class: 'cheat-grid' });
+  cards.forEach(([h, body]) => grid.append(el('div', { class: 'cheat-card' }, el('h3', {}, h), el('div', { class: 'cheat-body', html: body }))));
+  wrap.append(grid);
+  wrap.append(el('div', { class: 'lesson-nav' },
+    el('button', { onclick: () => go('home') }, '‹ Back to menu'),
+    el('button', { class: 'primary', onclick: () => go('mock') }, 'Go to mock exam →')));
+  v.append(wrap);
+  typeset();
+  window.scrollTo(0, 0);
+}
+
+/* ============================ ROUTER / SHELL ============================ */
+function buildRail() {
+  const nav = document.getElementById('railNav');
+  nav.replaceChildren();
+  const done = new Set(store.done);
+  LESSONS.forEach((l, i) => {
+    const b = el('button', { onclick: () => go(l.id) },
+      el('span', { class: 'n' }, String(i + 1)),
+      el('span', {}, l.title),
+      el('span', { class: 'tick' }, '\u2713'));
+    if (done.has(l.id)) b.classList.add('done');
+    b.dataset.id = l.id;
+    nav.append(b);
+  });
+  const mb = el('button', { onclick: () => go('mock') },
+    el('span', { class: 'n' }, '\u2605'), el('span', {}, 'Mock exam'), el('span', { class: 'tick' }, '\u2713'));
+  if (done.has('mock')) mb.classList.add('done');
+  mb.dataset.id = 'mock';
+  nav.append(mb);
+  const cb = el('button', { onclick: () => go('cheat') },
+    el('span', { class: 'n' }, '\u25a4'), el('span', {}, 'Cheat sheet'));
+  cb.dataset.id = 'cheat';
+  nav.append(cb);
+
+  const total = LESSONS.length + 1;
+  const n = [...done].filter(x => LESSONS.some(l => l.id === x) || x === 'mock').length;
+  document.getElementById('railFill').style.width = `${(n / total) * 100}%`;
+  document.getElementById('railPct').textContent = `${n} of ${total} done`;
+}
+
+function setActive(id) {
+  document.querySelectorAll('#railNav button').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+}
+
+function renderHome() {
+  const v = document.getElementById('view');
+  v.replaceChildren();
+  const wrap = el('div', { class: 'wrap wide' });
+  const hero = el('div', { class: 'hero' });
+  hero.append(
+    el('span', { class: 'eyebrow' }, 'Linear Algebra \u00b7 EC133 \u00b7 last-night revision'),
+    el('h2', {}, 'Pass the paper by drilling the five questions it always asks.'),
+    el('p', { html: 'Every EC133 paper from 2016 to 2024 shares one skeleton: five questions, answer three, 25 marks each \u2014 row reduction, matrix representations, eigenvalues, quadratic forms, and proofs. Each lesson below is one intuition, one <b>animated</b> worked example, one practice problem, and a note on what the marker actually ticks.' }),
+    el('p', { html: 'Target: 30\u201340%. That is roughly one and a bit questions \u2014 built almost entirely from the procedural marks in lessons 1\u20134. Finish with the <b>cheat sheet</b> and the timed <b>mock exam</b>.' }),
+    el('span', { class: 'stamp' }, 'work through 1 \u2192 5 first')
+  );
+  wrap.append(hero);
+
+  const grid = el('div', { class: 'grid' });
+  const done = new Set(store.done);
+  LESSONS.forEach((l, i) => {
+    const c = el('div', { class: 'card' + (done.has(l.id) ? ' done' : ''), onclick: () => go(l.id) },
+      el('div', { class: 'card-top' }, el('span', { class: 'idx' }, `0${i + 1}`), el('span', { class: 'qtag' }, l.q)),
+      el('h3', {}, l.title),
+      el('p', {}, l.blurb),
+      el('div', { class: 'card-foot' }, '\u2713 completed'));
+    grid.append(c);
+  });
+  grid.append(el('div', { class: 'card mock' + (done.has('mock') ? ' done' : ''), onclick: () => go('mock') },
+    el('div', { class: 'card-top' }, el('span', { class: 'idx' }, '\u2605'), el('span', { class: 'qtag' }, '75 min')),
+    el('h3', {}, 'Mock exam'),
+    el('p', {}, 'Three real past-paper questions under a visible timer, with model solutions revealed after.'),
+    el('div', { class: 'card-foot' }, '\u2713 completed')));
+  grid.append(el('div', { class: 'card mock', onclick: () => go('cheat') },
+    el('div', { class: 'card-top' }, el('span', { class: 'idx' }, '\u25a4'), el('span', { class: 'qtag' }, 'recap')),
+    el('h3', {}, 'Cheat sheet'),
+    el('p', {}, 'Every procedure in exam order, plus the formula-sheet essentials and an exam-day plan. Phone-friendly.'),
+    el('div', { class: 'card-foot' }, '')));
+  wrap.append(grid);
+
+  const reset = el('button', { class: 'theme-btn', style: 'width:auto;margin-top:28px;padding:8px 14px', onclick: () => { store.clear(); buildRail(); renderHome(); } }, 'Reset progress');
+  wrap.append(reset);
+  v.append(wrap);
+  typeset();
+}
+
+function renderLesson(l) {
+  const v = document.getElementById('view');
+  v.replaceChildren();
+  const idx = LESSONS.indexOf(l);
+  const wrap = el('div', { class: 'wrap' });
+  wrap.append(el('div', { class: 'lesson-head' },
+    el('span', { class: 'eyebrow' }, `Lesson ${idx + 1} of ${LESSONS.length} \u00b7 maps to ${l.q}`),
+    el('h2', {}, l.title)));
+  l.build().forEach(b => wrap.append(b));
+
+  const navRow = el('div', { class: 'lesson-nav' });
+  navRow.append(el('button', { onclick: () => go(idx > 0 ? LESSONS[idx - 1].id : 'home') },
+    '\u2039 ' + (idx > 0 ? LESSONS[idx - 1].title : 'Menu')));
+  const nextId = idx < LESSONS.length - 1 ? LESSONS[idx + 1].id : 'mock';
+  const nextLabel = idx < LESSONS.length - 1 ? LESSONS[idx + 1].title : 'Mock exam';
+  navRow.append(el('button', {
+    class: 'primary',
+    onclick: () => { store.mark(l.id); buildRail(); go(nextId); }
+  }, 'Mark done \u2192 ' + nextLabel));
+  wrap.append(navRow);
+  v.append(wrap);
+  typeset();
+  window.scrollTo(0, 0);
+}
+
+function closeRail() { document.getElementById('rail').classList.remove('open'); document.querySelector('.rail-scrim')?.remove(); }
+function go(id) {
+  closeRail();
+  if (id === 'home') { setActive(null); renderHome(); location.hash = ''; return; }
+  if (id === 'mock') { setActive('mock'); renderMock(); location.hash = 'mock'; return; }
+  if (id === 'cheat') { setActive('cheat'); renderCheat(); location.hash = 'cheat'; return; }
+  const l = LESSONS.find(x => x.id === id);
+  if (!l) { renderHome(); return; }
+  setActive(id);
+  renderLesson(l);
+  location.hash = id;
+}
+
+/* mobile rail */
+document.getElementById('railToggle').onclick = () => {
+  const rail = document.getElementById('rail');
+  const open = rail.classList.toggle('open');
+  if (open) document.body.append(el('button', { class: 'rail-scrim', 'aria-label': 'Close menu', onclick: closeRail }));
+  else closeRail();
+};
+
+/* theme toggle */
+document.getElementById('themeBtn').onclick = () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : cur === 'light' ? 'dark' : (matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark');
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('ec133theme', next); } catch {}
+};
+try { const t = localStorage.getItem('ec133theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch {}
+
+/* boot */
+buildRail();
+const start = location.hash.slice(1);
+if (start && (start === 'mock' || start === 'cheat' || LESSONS.some(l => l.id === start))) go(start); else renderHome();
+window.addEventListener('hashchange', () => {
+  const h = location.hash.slice(1);
+  if (!h && !document.querySelector('.hero')) renderHome();
+});
+</script>
+</body>
+</html>
