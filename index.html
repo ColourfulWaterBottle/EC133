@@ -1380,7 +1380,7 @@ function renderCheat() {
         <li>Matrix of \\(f\\): column \\(j\\) is \\(f(\\mathbf e_j)\\) — the coefficients of each output slot go <b>down a column</b>.</li>
         <li>Composite \\(q\\circ p\\) (do \\(p\\) first) has matrix \\(BA\\).</li>
         <li>Change of basis: \\(Q=[\\mathbf v_1\\,\\mathbf v_2\\,\\mathbf v_3]\\) (new basis as columns) converts new→standard; \\(Q^{-1}\\) converts standard→new; matrix in new basis \\(= Q^{-1}AQ\\).</li>
-        <li>\\(\\det A\\): \\(|\\det A|\\) = area/volume scale; \\(\\det A<0\\) reverses orientation; \\(\\det A=0\\) ⇔ columns dependent ⇔ singular.</li>
+        <li>\\(\\det A\\): \\(|\\det A|\\) = area/volume scale; \\(\\det A\\lt 0\\) reverses orientation; \\(\\det A=0\\) ⇔ columns dependent ⇔ singular.</li>
         <li>An \\(m\\times n\\) matrix always gives a linear map (\\(A(\\mathbf u+\\mathbf v)=A\\mathbf u+A\\mathbf v\\), \\(A(k\\mathbf u)=kA\\mathbf u\\)).</li>
       </ol>`],
     ['Q2 · Row reduction & spaces', `
@@ -1389,7 +1389,7 @@ function renderCheat() {
         <li>rank = #pivots. nullity = #non-pivot columns. Dimension Theorem: \\(\\operatorname{rank}+\\operatorname{nullity}=\\) #columns.</li>
         <li>Row space basis = non-zero RREF rows. Column space basis = pivot columns <b>of the original \\(A\\)</b>.</li>
         <li>Kernel: solve \\(A\\mathbf x=\\mathbf 0\\); set each free variable to 1 in turn.</li>
-        <li>Consistency: \\(\\operatorname{rank}A=\\operatorname{rank}[A|\\mathbf b]=n\\) → unique; \\(=\\operatorname{rank}<n\\) → ∞ many; \\(\\operatorname{rank}A<\\operatorname{rank}[A|\\mathbf b]\\) → none.</li>
+        <li>Consistency: \\(\\operatorname{rank}A=\\operatorname{rank}[A|\\mathbf b]=n\\) → unique; \\(=\\operatorname{rank}\\lt n\\) → ∞ many; \\(\\operatorname{rank}A\\lt\\operatorname{rank}[A|\\mathbf b]\\) → none.</li>
         <li>Row op on det: swap → \\(\\times(-1)\\); scale by \\(k\\) → \\(\\times k\\); add multiple → unchanged. (Because \\(\\det(EM)=\\det E\\,\\det M\\).)</li>
       </ol>`],
     ['Q3 · Eigenvalues & difference equations', `
@@ -1416,9 +1416,9 @@ function renderCheat() {
         <li>\\(\\chi_A\\) → eigenvalues → eigenvectors (auto-orthogonal for distinct \\(\\lambda\\), since \\(A=A^T\\)).</li>
         <li>Normalise eigenvectors → columns of \\(\\hat P\\); \\(A=\\hat P D\\hat P^{T}\\), \\(\\hat P^{T}=\\hat P^{-1}\\).</li>
         <li>New variables \\(\\mathbf V=\\hat P^{T}\\mathbf v\\); diagonal form \\(Q=\\lambda_1X^2+\\lambda_2Y^2+\\cdots\\).</li>
-        <li>Definiteness — <b>eigenvalue test:</b> all \\(+\\) pos. def.; all \\(-\\) neg. def.; mixed indefinite; some \\(0\\) semidefinite. <b>Sylvester:</b> \\(D_1,\\dots,D_n>0\\) pos. def.; signs \\(-,+,-,\\dots\\) neg. def.</li>
+        <li>Definiteness — <b>eigenvalue test:</b> all \\(+\\) pos. def.; all \\(-\\) neg. def.; mixed indefinite; some \\(0\\) semidefinite. <b>Sylvester:</b> \\(D_1,\\dots,D_n\\gt 0\\) pos. def.; signs \\(-,+,-,\\dots\\) neg. def.</li>
         <li>Orthogonal set of non-zero vectors ⇒ independent (dot the combination with each \\(\\mathbf v_i\\)).</li>
-        <li>Gram–Schmidt: \\(\\mathbf w_k = \\mathbf u_k - \\sum_{j<k}\\dfrac{\\mathbf u_k\\cdot\\mathbf w_j}{\\mathbf w_j\\cdot\\mathbf w_j}\\mathbf w_j\\), then normalise.</li>
+        <li>Gram–Schmidt: \\(\\mathbf w_k = \\mathbf u_k - \\sum_{j\\lt k}\\dfrac{\\mathbf u_k\\cdot\\mathbf w_j}{\\mathbf w_j\\cdot\\mathbf w_j}\\mathbf w_j\\), then normalise.</li>
         <li>\\(\\det\\) is <b>not</b> linear (\\(\\det(A{+}B)\\neq\\det A+\\det B\\)); \\(\\operatorname{tr}\\) <b>is</b> linear.</li>
       </ol>`],
     ['Formula-sheet essentials', `
