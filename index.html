@@ -406,7 +406,14 @@ const el = (tag, attrs = {}, ...kids) => {
   for (const kid of kids) if (kid != null) n.append(kid.nodeType ? kid : document.createTextNode(kid));
   return n;
 };
-const typeset = () => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(); };
+function typeset(since = Date.now()) {
+  if (window.MathJax && MathJax.typesetPromise) { MathJax.typesetPromise().catch(() => {}); return; }
+  if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+    MathJax.startup.promise.then(() => MathJax.typesetPromise().catch(() => {}));
+    return;
+  }
+  if (Date.now() - since < 15000) setTimeout(() => typeset(since), 150); // library script still downloading
+}
 
 /* matrix -> HTML table with optional highlighted rows + augmented bar */
 function matrixTable(rows, { hotRows = [], augCol = null, pivots = [] } = {}) {
