@@ -1531,12 +1531,14 @@ document.getElementById('themeBtn').onclick = () => {
 try { const t = localStorage.getItem('ec133theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch {}
 
 /* boot */
+const validTarget = h => h === 'mock' || h === 'cheat' || LESSONS.some(l => l.id === h);
 buildRail();
 const start = location.hash.slice(1);
-if (start && (start === 'mock' || start === 'cheat' || LESSONS.some(l => l.id === start))) go(start); else renderHome();
+if (validTarget(start)) go(start); else renderHome();
 window.addEventListener('hashchange', () => {
   const h = location.hash.slice(1);
-  if (!h && !document.querySelector('.hero')) renderHome();
+  if (!h) { if (!document.querySelector('.hero')) go('home'); return; }
+  if (validTarget(h) && !document.querySelector(`#railNav button.active[data-id="${h}"]`)) go(h);
 });
 </script>
 </body>
