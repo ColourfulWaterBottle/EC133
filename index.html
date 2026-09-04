@@ -1372,55 +1372,60 @@ function renderCheat() {
   wrap.append(el('div', { class: 'lesson-head' },
     el('span', { class: 'eyebrow' }, 'One-screen recap'),
     el('h2', {}, 'Cheat sheet')));
-  wrap.append(el('p', { class: 'prose', html: 'Every procedure in the order the paper asks for it. Open this on your phone on the walk in.' }));
+  wrap.append(el('p', { class: 'prose', html: 'Short on time? Work straight down this list — it is ordered by marks-per-minute, not by question number. The first card is a timed plan.' }));
 
   const cards = [
-    ['Q1 · Linear maps & matrices', `
+    ['⏱ Crunch plan — 2½ hours to clear the bar', `
       <ol>
-        <li>Matrix of \\(f\\): column \\(j\\) is \\(f(\\mathbf e_j)\\) — the coefficients of each output slot go <b>down a column</b>.</li>
-        <li>Composite \\(q\\circ p\\) (do \\(p\\) first) has matrix \\(BA\\).</li>
-        <li>Change of basis: \\(Q=[\\mathbf v_1\\,\\mathbf v_2\\,\\mathbf v_3]\\) (new basis as columns) converts new→standard; \\(Q^{-1}\\) converts standard→new; matrix in new basis \\(= Q^{-1}AQ\\).</li>
-        <li>\\(\\det A\\): \\(|\\det A|\\) = area/volume scale; \\(\\det A\\lt 0\\) reverses orientation; \\(\\det A=0\\) ⇔ columns dependent ⇔ singular.</li>
-        <li>An \\(m\\times n\\) matrix always gives a linear map (\\(A(\\mathbf u+\\mathbf v)=A\\mathbf u+A\\mathbf v\\), \\(A(k\\mathbf u)=kA\\mathbf u\\)).</li>
-      </ol>`],
-    ['Q2 · Row reduction & spaces', `
+        <li><b>45 min · Row reduction / solving systems</b> (card ①). Best value per minute. Do <b>2 full examples</b>: coeff &amp; augmented matrix → RREF → solution set → row space, column space, kernel, rank read straight off → check the Dimension Theorem.</li>
+        <li><b>35 min · Matrix of a linear map + composition</b> (card ②). Read coefficients straight into a matrix; multiply \\(BA\\) for composites. Quick and mechanical.</li>
+        <li><b>10 min · break, eat something.</b></li>
+        <li><b>40 min · Eigenvalues / eigenvectors — the finding-them part only</b> + <b>determinants</b> (card ③). Don't chase full diagonalisation unless it clicks fast.</li>
+        <li><b>20 min · Proof templates</b> (card ④) + the exam-day triage (card ⑤). Then pack up.</li>
+      </ol>
+      <p style="margin:10px 0 0"><b>Cut unless you finish early:</b> quadratic forms / Sylvester's Criterion and full 3×3 diagonalisation — lower frequency, higher effort. They are the last two cards; glance only.</p>`],
+    ['① Row reduction & the three spaces (Q2) — start here', `
       <ol>
-        <li>Augment \\([A\\,|\\,\\mathbf b]\\); reduce with swap / scale / add-multiple. <b>Write every op.</b></li>
-        <li>rank = #pivots. nullity = #non-pivot columns. Dimension Theorem: \\(\\operatorname{rank}+\\operatorname{nullity}=\\) #columns.</li>
-        <li>Row space basis = non-zero RREF rows. Column space basis = pivot columns <b>of the original \\(A\\)</b>.</li>
-        <li>Kernel: solve \\(A\\mathbf x=\\mathbf 0\\); set each free variable to 1 in turn.</li>
+        <li>Augment \\([A\\,|\\,\\mathbf b]\\); reduce with swap / scale / add-multiple. <b>Write every op</b> (\\(R_2\\to R_2-2R_1\\)) — the operations are the working.</li>
+        <li>rank = #pivots. nullity = #non-pivot columns. Dimension Theorem: \\(\\operatorname{rank}+\\operatorname{nullity}=\\) #columns — state it in words, then plug in.</li>
+        <li>Row space basis = non-zero RREF rows. Column space basis = pivot-position columns <b>of the original \\(A\\)</b> (not the RREF).</li>
+        <li>Kernel: solve \\(A\\mathbf x=\\mathbf 0\\) from the same RREF; set each free variable to 1 in turn.</li>
         <li>Consistency: \\(\\operatorname{rank}A=\\operatorname{rank}[A|\\mathbf b]=n\\) → unique; \\(=\\operatorname{rank}\\lt n\\) → ∞ many; \\(\\operatorname{rank}A\\lt\\operatorname{rank}[A|\\mathbf b]\\) → none.</li>
-        <li>Row op on det: swap → \\(\\times(-1)\\); scale by \\(k\\) → \\(\\times k\\); add multiple → unchanged. (Because \\(\\det(EM)=\\det E\\,\\det M\\).)</li>
+        <li>"Write \\(\\mathbf w\\) as a combination of the column basis" = solve \\(A\\mathbf x=\\mathbf w\\); the entries of \\(\\mathbf x\\) are the coefficients.</li>
       </ol>`],
-    ['Q3 · Eigenvalues & difference equations', `
+    ['② Linear maps & matrices (Q1a)', `
       <ol>
-        <li>\\(k\\)-th order recurrence → first-order system: \\(y_n=x_{n-1}\\), etc. Coefficient (companion) matrix \\(A\\).</li>
-        <li>\\(\\chi_A(k)=\\det(A-kI)=0\\) → eigenvalues. (2×2: \\(k^2-(\\operatorname{tr}A)k+\\det A\\).)</li>
-        <li>Eigenvector: solve \\((A-kI)\\mathbf v=\\mathbf 0\\) for each \\(k\\).</li>
-        <li>\\(Q\\) = eigenvectors as columns, \\(D\\) = eigenvalues in the same order; \\(A=QDQ^{-1}\\), \\(A^n=QD^nQ^{-1}\\).</li>
-        <li>Closed form: \\(x_n=\\alpha\\lambda_1^n+\\beta\\lambda_2^n\\); fit \\(\\alpha,\\beta\\) from \\(x_0,x_1\\).</li>
-        <li>\\(x_n/x_{n-1}\\to\\) dominant (largest \\(|\\lambda|\\)); ratios → dominant eigenvector. Transition matrix ⇒ \\(\\lambda=1\\), long-run proportions = its eigenvector.</li>
+        <li>Matrix of \\(f\\): each output component's coefficients form a <b>row</b>; equivalently column \\(j\\) is \\(f(\\mathbf e_j)\\) — same matrix.</li>
+        <li>Composite \\(q\\circ p\\) (do \\(p\\) first) has matrix \\(BA\\). Check the inner dimensions match before multiplying.</li>
+        <li>\\(m\\times n\\) matrix always gives a linear map: \\(A(\\mathbf u+\\mathbf v)=A\\mathbf u+A\\mathbf v\\), \\(A(k\\mathbf u)=kA\\mathbf u\\) — that's the whole proof.</li>
+        <li>Change of basis (if asked): \\(Q\\) = new basis vectors as columns, converts new→standard; \\(Q^{-1}\\) converts standard→new; matrix in the new basis \\(=Q^{-1}AQ\\). Check \\(\\det\\) and \\(\\operatorname{tr}\\) are unchanged.</li>
       </ol>`],
-    ['Q4 · Vector spaces & subspaces', `
+    ['③ Eigenvalues (find them) + determinants', `
       <ol>
-        <li>Subspace test: (i) contains \\(\\mathbf 0\\); (ii) closed under \\(+\\); (iii) closed under scalar \\(\\times\\). One fails ⇒ not a subspace (e.g. \\(\\{(r,r^2,1)\\}\\): no \\(\\mathbf 0\\), not closed).</li>
-        <li>\\(\\ker f\\), \\(\\operatorname{im} f\\) are always subspaces (memorised proof — Lesson 6).</li>
-        <li>Dimension of a solution space = number of free constants; basis = the functions they multiply.</li>
-        <li>Matrix of a map on a function / polynomial / matrix space: apply the map to each basis element, write each result in that basis as a column.</li>
-        <li>\\(h\\) injective ⇔ \\(\\ker h=\\{\\mathbf 0\\}\\).</li>
-        <li>Weird operations (e.g. \\(\\mathbb R_+\\), \\(x\\boxplus y = xy\\)): the zero vector is whatever leaves \\(x\\) unchanged; find an isomorphism to \\(\\mathbb R^n\\) (here \\(\\ln\\)).</li>
+        <li><b>Eigenvalues:</b> solve \\(\\det(A-kI)=0\\). For 2×2: \\(k^2-(\\operatorname{tr}A)k+\\det A=0\\). For a companion / 3×3, cofactor-expand along the row or column with the most zeros.</li>
+        <li><b>Eigenvector</b> for each \\(k\\): solve \\((A-kI)\\mathbf v=\\mathbf 0\\) — one free parameter, pick any non-zero value.</li>
+        <li>If asked to verify given eigenvalues: substitute each into \\(\\chi_A(k)\\) and show it's \\(0\\). Fast, full marks.</li>
+        <li><i>Only if it clicks fast:</i> \\(Q\\) = eigenvectors as columns, \\(D\\) = eigenvalues same order, \\(A=QDQ^{-1}\\); closed form \\(x_n=\\alpha\\lambda_1^n+\\beta\\lambda_2^n\\), fit \\(\\alpha,\\beta\\) from \\(x_0,x_1\\).</li>
+        <li><b>3×3 determinant:</b> cofactor expand; the \\((i,j)\\) sign is \\((-1)^{i+j}\\) (checkerboard \\(+\\,-\\,+\\)).</li>
+        <li><b>Geometry:</b> \\(|\\det A|\\) = area/volume scale factor; \\(\\det A\\lt 0\\) reverses orientation; \\(\\det A=0\\) ⇔ singular ⇔ columns dependent ⇔ \\(0\\) is an eigenvalue.</li>
+        <li>Row ops on \\(\\det\\): swap \\(\\times(-1)\\); scale by \\(k\\) is \\(\\times k\\); add a multiple leaves it unchanged.</li>
       </ol>`],
-    ['Q5 · Quadratic forms & orthogonality', `
-      <ol>
-        <li>\\(A\\) symmetric: diagonal = square coefficients; off-diagonal = <b>half</b> each cross coefficient.</li>
-        <li>\\(\\chi_A\\) → eigenvalues → eigenvectors (auto-orthogonal for distinct \\(\\lambda\\), since \\(A=A^T\\)).</li>
-        <li>Normalise eigenvectors → columns of \\(\\hat P\\); \\(A=\\hat P D\\hat P^{T}\\), \\(\\hat P^{T}=\\hat P^{-1}\\).</li>
-        <li>New variables \\(\\mathbf V=\\hat P^{T}\\mathbf v\\); diagonal form \\(Q=\\lambda_1X^2+\\lambda_2Y^2+\\cdots\\).</li>
-        <li>Definiteness — <b>eigenvalue test:</b> all \\(+\\) pos. def.; all \\(-\\) neg. def.; mixed indefinite; some \\(0\\) semidefinite. <b>Sylvester:</b> \\(D_1,\\dots,D_n\\gt 0\\) pos. def.; signs \\(-,+,-,\\dots\\) neg. def.</li>
-        <li>Orthogonal set of non-zero vectors ⇒ independent (dot the combination with each \\(\\mathbf v_i\\)).</li>
-        <li>Gram–Schmidt: \\(\\mathbf w_k = \\mathbf u_k - \\sum_{j\\lt k}\\dfrac{\\mathbf u_k\\cdot\\mathbf w_j}{\\mathbf w_j\\cdot\\mathbf w_j}\\mathbf w_j\\), then normalise.</li>
-        <li>\\(\\det\\) is <b>not</b> linear (\\(\\det(A{+}B)\\neq\\det A+\\det B\\)); \\(\\operatorname{tr}\\) <b>is</b> linear.</li>
-      </ol>`],
+    ['④ Proof templates', `
+      <ul>
+        <li><b>"\\(f\\) is linear":</b> take <b>general</b> \\(\\mathbf u,\\mathbf v\\) and scalar \\(k\\); show \\(f(\\mathbf u+\\mathbf v)=f(\\mathbf u)+f(\\mathbf v)\\) and \\(f(k\\mathbf u)=k\\,f(\\mathbf u)\\). For \\(f(\\mathbf v)=A\\mathbf v\\) it's just the distributive law.</li>
+        <li><b>Composite / inverse:</b> chain the two linear maps; for \\(h^{-1}\\), set \\(\\mathbf u'=h^{-1}(\\mathbf u)\\) so \\(\\mathbf u=h(\\mathbf u')\\), then push through.</li>
+        <li><b>"\\(U\\) is a subspace":</b> (i) \\(\\mathbf 0\\in U\\); (ii) closed under \\(+\\); (iii) closed under scalar \\(\\times\\). One failure ⇒ not a subspace.</li>
+        <li><b>\\(\\ker f\\), \\(\\operatorname{im} f\\) are subspaces:</b> \\(f(\\mathbf 0)=\\mathbf 0\\); if \\(f(\\mathbf u)=f(\\mathbf v)=\\mathbf 0\\) then \\(f(\\mathbf u+\\mathbf v)=\\mathbf 0\\); \\(f(k\\mathbf v)=k\\mathbf 0=\\mathbf 0\\). For the image, write each element as \\(f(\\text{something})\\).</li>
+        <li>Always say <b>"for all"</b> and take general elements — one example scores nothing. Name each property ("since \\(f\\) is linear…") as you use it.</li>
+      </ul>`],
+    ['⑤ Exam-day plan', `
+      <ul>
+        <li>Read all 5, then commit to <b>Q2</b> and <b>Q1</b>, and pick the friendlier of Q3 / (Q4 or Q5) for the third.</li>
+        <li>First 3&ndash;4 min of each: write the coefficient / augmented matrix and the method headings — those are setup marks.</li>
+        <li>Every calculation gets its working: "solutions without accompanying working might not receive full marks" is printed on the paper.</li>
+        <li>If a proof stalls, still write the definitions and the "for all \\(\\mathbf u,\\mathbf v\\), \\(k\\)" opening — partial marks.</li>
+        <li>~40 min per question. Bank the easy parts of all three before polishing any one. You need roughly \\(20/75\\) — breadth beats depth.</li>
+      </ul>`],
     ['Formula-sheet essentials', `
       <ul>
         <li>\\(\\det(AB)=\\det A\\det B\\); \\(\\det(A^{T})=\\det A\\); \\(\\det(A^{-1})=1/\\det A\\); \\(\\det(kA)=k^{n}\\det A\\).</li>
@@ -1430,14 +1435,21 @@ function renderCheat() {
         <li>Rotation by \\(\\theta\\): \\(\\begin{bmatrix}\\cos\\theta&-\\sin\\theta\\\\\\sin\\theta&\\cos\\theta\\end{bmatrix}\\), \\(\\det=1\\). Reflection: \\(\\det=-1\\), squares to \\(I\\).</li>
         <li>Subspace axioms to quote: V0 (closed \\(+\\)), V3 (\\(\\mathbf 0\\)), V4 (negatives), S0 (closed scalar \\(\\times\\)).</li>
       </ul>`],
-    ['Exam-day plan', `
-      <ul>
-        <li>Read all 5, then commit to <b>Q2, Q3</b> and whichever of Q1 / Q5 looks friendliest.</li>
-        <li>Spend the first 3&ndash;4 min writing the coefficient/aug matrix and the method headings — those are setup marks.</li>
-        <li>Every calculation gets its working: "solutions without accompanying working might not receive full marks" is printed on the paper.</li>
-        <li>If a proof stalls, still write the definitions and the "for all \\(\\mathbf u,\\mathbf v\\), \\(k\\)" opening — partial marks.</li>
-        <li>40 min per question. Bank the easy parts of all three before polishing any one.</li>
-      </ul>`]
+    ['Lower priority today — vector spaces & subspaces (Q4)', `
+      <ol>
+        <li>Subspace test: (i) contains \\(\\mathbf 0\\); (ii) closed under \\(+\\); (iii) closed under scalar \\(\\times\\). One fails ⇒ not a subspace (e.g. \\(\\{(r,r^2,1)\\}\\): no \\(\\mathbf 0\\), not closed).</li>
+        <li>Dimension of a solution space = number of free constants; basis = the functions they multiply.</li>
+        <li>Matrix of a map on a function / polynomial / matrix space: apply the map to each basis element, write each result in that basis as a column.</li>
+        <li>\\(h\\) injective ⇔ \\(\\ker h=\\{\\mathbf 0\\}\\). Weird operations (\\(\\mathbb R_+\\), \\(x\\boxplus y=xy\\)): the zero vector is whatever leaves \\(x\\) unchanged; find an isomorphism to \\(\\mathbb R^n\\) (here \\(\\ln\\)).</li>
+      </ol>`],
+    ['Skip unless time to spare — quadratic forms (Q5)', `
+      <ol>
+        <li>\\(A\\) symmetric: diagonal = square coefficients; off-diagonal = <b>half</b> each cross coefficient.</li>
+        <li>\\(\\chi_A\\) → eigenvalues → eigenvectors (auto-orthogonal for distinct \\(\\lambda\\), since \\(A=A^T\\)); normalise → columns of \\(\\hat P\\); \\(A=\\hat P D\\hat P^{T}\\).</li>
+        <li>New variables \\(\\mathbf V=\\hat P^{T}\\mathbf v\\); diagonal form \\(Q=\\lambda_1X^2+\\lambda_2Y^2+\\cdots\\).</li>
+        <li>Definiteness — <b>eigenvalue test:</b> all \\(+\\) pos. def.; all \\(-\\) neg. def.; mixed indefinite; some \\(0\\) semidefinite. <b>Sylvester:</b> \\(D_1,\\dots,D_n\\gt 0\\) pos. def.; signs \\(-,+,-,\\dots\\) neg. def.</li>
+        <li>Even if short on time, the Sylvester (leading-minor) test alone is ~5 quick marks.</li>
+      </ol>`]
   ];
 
   const grid = el('div', { class: 'cheat-grid' });
@@ -1494,8 +1506,8 @@ function renderHome() {
     el('span', { class: 'eyebrow' }, 'Linear Algebra \u00b7 EC133 \u00b7 last-night revision'),
     el('h2', {}, 'Pass the paper by drilling the five questions it always asks.'),
     el('p', { html: 'Every EC133 paper from 2016 to 2024 shares one skeleton: five questions, answer three, 25 marks each \u2014 row reduction, matrix representations, eigenvalues, quadratic forms, and proofs. Each lesson below is one intuition, one <b>animated</b> worked example, one practice problem, and a note on what the marker actually ticks.' }),
-    el('p', { html: 'Target: 30\u201340%. That is roughly one and a bit questions \u2014 built almost entirely from the procedural marks in lessons 1\u20134. Finish with the <b>cheat sheet</b> and the timed <b>mock exam</b>.' }),
-    el('span', { class: 'stamp' }, 'work through 1 \u2192 5 first')
+    el('p', { html: 'Target: 30\u201340% \u2014 roughly one and a bit questions, built almost entirely from the procedural marks in row reduction, matrix representations, and finding eigenvalues. <b>Tight on time? Open the cheat sheet</b> \u2014 it has a timed crunch plan and is ordered by marks-per-minute.' }),
+    el('span', { class: 'stamp' }, 'short on time \u2192 cheat sheet')
   );
   wrap.append(hero);
 
